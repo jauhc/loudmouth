@@ -27,7 +27,7 @@ Powered by [CSGSI by rakijah](https://github.com/rakijah/CSGSI)
 - Presses right shift to execute script
 
 ### Results
-![results](https://github.com/jauhc/loudmouth/raw/master/rk_l.png)
+![results](https://github.com/jauhc/loudmouth/raw/master/rk_l.jpg)
 
 ### Disclaimer
 There is *nothing* here that could trigger a ban, the low level keyboard input is nothing compared to random programs opening handles
