@@ -27,6 +27,13 @@ namespace loudmouth
                     Utils._testing = true;
                 if (args[i] == "s")
                     Utils._singlesMode = true;
+                if (args[i] == "p")
+                    Utils._puntualMode = true;
+            }
+            // dont allow overlapping modes
+            if (Utils._puntualMode && Utils._singlesMode) {
+                Utils.log(1, "Overlapping modes! Fix your parameters.");
+                Environment.Exit(1);
             }
             Utils.Init();
             gsl = new GameStateListener(1338);
@@ -34,7 +41,10 @@ namespace loudmouth
             gsl.NewGameState += OnNewGameState;
 
             if (gsl.Running) Utils.log(0, "loud mouth online!");
+            if (Utils._testing) Utils.log(0, "dev mode on");
+            // actual modes here, have them as `else if` so they dont mess with eachother
             if (Utils._singlesMode) Utils.log(0, "simple output mode on");
+            else if (Utils._puntualMode) Utils.log(0, "punctual mode on");
         }
 
         /// <summary>
@@ -63,14 +73,25 @@ namespace loudmouth
                 if (playerKills == -1)
                     playerKills = gs.Player.MatchStats.Kills;
                 var curkills = gs.Player.MatchStats.Kills;
-                if (curkills > playerKills)
-                {
-                    for (int i = 0; i < (curkills - playerKills); i++)
-                    {
-                    if (Utils._singlesMode)
-                        Utils.owo("+" + Environment.NewLine + "enemydown");
-                    else if (!Utils._singlesMode)
-                        onKill(gs);
+                if (curkills > playerKills) {
+                    for (int i = 0; i < (curkills - playerKills); i++) {
+                        if (Utils._puntualMode) {
+                            string o = $"Kill #{gs.Player.State.RoundKills} [Round {gs.Map.Round}]";
+                            if (gs.Player.State.RoundKillHS > gs.Player.State.RoundKillHS)
+                                o += $", headshot";
+                            if (gs.Player.State.Flashed != 0)
+                                o += $" / {Math.Round((decimal)(gs.Player.State.Flashed / 255), 1)}% flashed";
+                            if (gs.Player.State.Smoked != 0)
+                                o += $" / {Math.Round((decimal)(gs.Player.State.Smoked / 255), 1)}% smoked";
+                            if (gs.Player.State.Burning != 0)
+                                o += $" / {Math.Round((decimal)(gs.Player.State.Burning / 255), 1)}% burning";
+                            o += $"{Environment.NewLine} enemydown";
+                            Utils.owo(o);
+                        }
+                        if (Utils._singlesMode)
+                            Utils.owo("+" + Environment.NewLine + "enemydown");
+                        else if (!Utils._singlesMode && !Utils._puntualMode)
+                            onKill(gs);
                     }
                 }
                 playerKills = curkills;
@@ -79,11 +100,13 @@ namespace loudmouth
                 if (myDeaths == -1)
                     myDeaths = gs.Player.MatchStats.Deaths;
                 var curDeaths = gs.Player.MatchStats.Deaths;
-                if (curDeaths != myDeaths && !(gs.Map.Round == 1 && gs.Player.MatchStats.Deaths == 0))
+                if (curDeaths > myDeaths && !(gs.Map.Round == 1 && gs.Player.MatchStats.Deaths == 0))
                 {
+                    if (Utils._puntualMode) // todo
+                        Utils.owo(":(");
                     if (Utils._singlesMode)
                         Utils.owo("-");
-                    else if (!Utils._singlesMode)
+                    else if (!Utils._singlesMode && !Utils._puntualMode)
                         onDeath(gs);
                 }
                 myDeaths = curDeaths;
@@ -145,7 +168,7 @@ namespace loudmouth
                     };
                 dad += postfix[rng.Next(postfix.Count)];
             }
-            Utils.owo(dad);
+            Utils.owo(dad + Environment.NewLine + "enemydown");
         }
 
         /// <summary>

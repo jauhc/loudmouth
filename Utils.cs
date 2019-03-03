@@ -17,7 +17,9 @@ public static class Utils
     static String configFile = "";
     public static bool _testing = false;
     public static bool _singlesMode = false;
+    public static bool _puntualMode = false;
     public static String me = "0";
+    // could check gs.Provider.SteamID
 
     /// <summary>
     /// A fancy log method, 0 = INFO, 1 = ERROR, 2 = WARN
@@ -222,6 +224,6 @@ public static class Utils
     static void writeCheese(String dad)
     {
         log(0, dad.makePrintable());
-        WriteCFG(configFile, $"say {dad}");
+        WriteCFG(configFile, $"say {dad}{Environment.NewLine}");
     }
 }
