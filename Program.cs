@@ -12,7 +12,10 @@ namespace loudmouth
     class Program
     {
         static CSGSI.GameStateListener gsl;
-        static int playerKills = -1;
+        static CSGSI.GameState oldState;
+        static int oldAmmo = 0;
+        static int playerKills = -64;
+        static int roundHS = -64;
         static int myDeaths = -1;
         static Random rng = new Random();
 
@@ -63,6 +66,18 @@ namespace loudmouth
             return gs.Player.SteamID.ToString() == Utils.me;
         }
 
+        static bool isGun(CSGSI.Nodes.WeaponType w)
+        {
+            if (w == CSGSI.Nodes.WeaponType.Pistol
+                || w == CSGSI.Nodes.WeaponType.Rifle
+                || w == CSGSI.Nodes.WeaponType.SniperRifle
+                || w == CSGSI.Nodes.WeaponType.SubmachineGun
+                || w == CSGSI.Nodes.WeaponType.Shotgun
+                || w == CSGSI.Nodes.WeaponType.MachineGun)
+                return true;
+            return false;
+        }
+
         /// <summary>
         /// Kills and deaths are updated in this method
         /// </summary>
@@ -70,21 +85,39 @@ namespace loudmouth
         {
             if (bGameActive(gs) && isLocalPlayer(gs))
             {
-                if (playerKills == -1)
+                if (((double)gs.Player.Weapons.ActiveWeapon.AmmoClip / (double)gs.Player.Weapons.ActiveWeapon.AmmoClipMax) < 0.3
+                && (gs.Player.Weapons.ActiveWeapon.AmmoClip < oldState.Player.Weapons.ActiveWeapon.AmmoClip)
+                && isGun(gs.Player.Weapons.ActiveWeapon.Type)
+                && gs.Player.Weapons.ActiveWeapon.AmmoClipMax > 1)
+                    Console.Beep(2334, 256);
+                oldAmmo = gs.Player.Weapons.ActiveWeapon.AmmoClip;
+
+                // round 1 start check thing
+                if (gs.Round.Phase.ToString().ToLower() == "live" 
+                && gs.Map.Round == 1 
+                && (oldState.Map.Phase.ToString().ToLower() == "freezetime" 
+                && oldState.Round.Phase.ToString().ToLower() == "freezetime"))
+                {
+                    Utils.owo($"Game start event");
+                }
+
+                if (playerKills == -64)
                     playerKills = gs.Player.MatchStats.Kills;
                 var curkills = gs.Player.MatchStats.Kills;
                 if (curkills > playerKills) {
                     for (int i = 0; i < (curkills - playerKills); i++) {
                         if (Utils._puntualMode) {
-                            string o = $"Kill #{gs.Player.State.RoundKills} [Round {gs.Map.Round}]";
-                            if (gs.Player.State.RoundKillHS > gs.Player.State.RoundKillHS)
-                                o += $", headshot";
+                            string o = $"Kill #{gs.Player.State.RoundKills} [Round {gs.Map.Round.ToString()}]";
+                            if (gs.Player.State.RoundKillHS > roundHS) {
+                                o += $" (hs)";
+                            }
+                            roundHS = gs.Player.State.RoundKillHS;
                             if (gs.Player.State.Flashed != 0)
-                                o += $" / {Math.Round((decimal)(gs.Player.State.Flashed / 255), 1)}% flashed";
+                                o += $" / {Math.Round((double)(gs.Player.State.Flashed / (double)255) * 100,1)}% flashed";
                             if (gs.Player.State.Smoked != 0)
-                                o += $" / {Math.Round((decimal)(gs.Player.State.Smoked / 255), 1)}% smoked";
+                                o += $" / {Math.Round((double)(gs.Player.State.Smoked / (double)255) * 100,1)}% smoked";
                             if (gs.Player.State.Burning != 0)
-                                o += $" / {Math.Round((decimal)(gs.Player.State.Burning / 255), 1)}% burning";
+                                o += $" / {Math.Round((double)(gs.Player.State.Burning / (double)255) * 100,1)}% burning";
                             o += $"{Environment.NewLine} enemydown";
                             Utils.owo(o);
                         }
@@ -103,7 +136,7 @@ namespace loudmouth
                 if (curDeaths > myDeaths && !(gs.Map.Round == 1 && gs.Player.MatchStats.Deaths == 0))
                 {
                     if (Utils._puntualMode) // todo
-                        Utils.owo(":(");
+                        Utils.owo("oops i have died");
                     if (Utils._singlesMode)
                         Utils.owo("-");
                     else if (!Utils._singlesMode && !Utils._puntualMode)
@@ -111,6 +144,7 @@ namespace loudmouth
                 }
                 myDeaths = curDeaths;
             }
+            oldState = gs;
         }
 
         /// <summary>

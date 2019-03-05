@@ -170,6 +170,7 @@ public static class Utils
     /// <summary>
     /// Purpose: Getting steam3id from registry value, then convert it to communityid format
     /// todo: what if the registry value does not exist?
+    /// todo: some kind of check if the user changed steam accounts while running this application
     /// </summary>
     static String getMyCommunityID()
     {
