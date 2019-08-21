@@ -230,7 +230,6 @@ namespace loudmouth
                 "i was looking at the map",
                 "excuse me?",
                 "oh",
-                "i was tabbed out :(",
                 "fricking tickrate"
                     });
             }

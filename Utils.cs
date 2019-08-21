@@ -1,18 +1,24 @@
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using System.Timers;
 using System.Text.RegularExpressions;
+using System.Threading;
+using PrimS.Telnet;
 
 /*
 Purpose of file:
     this file contains the
     small things that make this work
  */
+
+/*
+   todo:
+   move from keyboard event to telnet
+ */
 public static class Utils
 {
-    [DllImport("user32.dll")]
-    static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, int dwExtraInfo);
+    static System.Threading.CancellationToken ct = new System.Threading.CancellationToken();
+    public static PrimS.Telnet.Client client = new PrimS.Telnet.Client("localhost", 2121, ct);
     static System.Timers.Timer timer1;
     static String configFile = "";
     public static bool _testing = false;
@@ -43,7 +49,8 @@ public static class Utils
         }
         Console.ForegroundColor = ConsoleColor.White;
     }
-
+    public static Action<string> echo = s => client.WriteLine($"echo {s}");
+    public static Action<string> run = s => client.WriteLine(s);
 
     /// <summary>
     /// Dumb wrapper for sleep method
@@ -52,17 +59,6 @@ public static class Utils
     {
         if (ms > 0)
             System.Threading.Thread.Sleep(ms);
-    }
-
-    /// <summary>
-    /// Hits a key on low level
-    /// </summary>
-    public static void hitkey(byte code)
-    {
-        // right shift is 0xA1
-        keybd_event(code, 0x36, 0x0, 0);
-        sleep(26);
-        keybd_event(code, 0x36, 0x2, 0);
     }
 
     static void InitTimer()
@@ -83,10 +79,7 @@ public static class Utils
             log(0, thingsToSay.Dequeue());
             return;
         }
-        writeCheese(thingsToSay.Dequeue());
-        sleep(32); // mercy time in case if bad disk
-        hitkey(0xA1);
-        clearCheese();
+        run($"say {thingsToSay.Dequeue()}");
         if (thingsToSay.Count > 0) { timer1.Start(); timer1.Enabled = true; }
         if (thingsToSay.Count == 0) { timer1.Stop(); timer1.Enabled = true; }
     }
@@ -141,10 +134,14 @@ public static class Utils
         Console.SetBufferSize(56, 15);
         Console.ForegroundColor = ConsoleColor.White;
         if (!readConfig()) Environment.Exit(1);
+        while (!client.IsConnected)
+        {
+            log(2, "Awaiting RCON connection...");
+            sleep(2000);
+        } // probably bad
+        if (client.IsConnected) log(0, "RCON Connected!");
         me = getMyCommunityID();
-        clearCheese();
         InitTimer();
-
         if (_testing)
         {
             Console.Title = $"[dev] {Console.Title} ({me})";
@@ -187,17 +184,6 @@ public static class Utils
     }
 
     /// <summary>
-    /// Pretty self-explanitory tbh?
-    /// </summary>
-    static void WriteCFG(String cfgpath, String data)
-    {
-        if (configFile.Length > 2)
-        {
-            System.IO.File.WriteAllText(cfgpath, data);
-        }
-    }
-
-    /// <summary>
     /// making a multiline string printable etc
     /// </summary>
     public static string makePrintable(this string s)
@@ -209,22 +195,5 @@ public static class Utils
                 sb.Append(i);
 
         return sb.ToString();
-    }
-
-    /// <summary>
-    /// Clears the config file to prevent old strings from being said
-    /// </summary>
-    static void clearCheese()
-    {
-        WriteCFG(configFile, " ");
-    }
-
-    /// <summary>
-    /// Writes the cheese strings to the config file
-    /// </summary>
-    static void writeCheese(String dad)
-    {
-        log(0, dad.makePrintable());
-        WriteCFG(configFile, $"say {dad}{Environment.NewLine}");
     }
 }
