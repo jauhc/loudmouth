@@ -13,19 +13,32 @@ Purpose of file:
 
 /*
    todo:
-   move from keyboard event to telnet
+   parse these
+    Player: jauhc - Damage Given
+        -------------------------
+        Damage Given to "Clarence" - 109 in 1 hit
+        Damage Given to "Oliver" - 61 in 2 hits
+        Damage Given to "Wally" - 110 in 1 hit
+        Damage Given to "Eugene" - 132 in 2 hits
+        Damage Given to "Graham" - 41 in 2 hits
+        Player: jauhc - Damage Taken
+        -------------------------
+
  */
 public static class Utils
 {
-    static System.Threading.CancellationToken ct = new System.Threading.CancellationToken();
-    public static PrimS.Telnet.Client client = new PrimS.Telnet.Client("localhost", 2121, ct);
+    public static PrimS.Telnet.Client client = new PrimS.Telnet.Client("localhost", 2121, new System.Threading.CancellationToken());
     static System.Timers.Timer timer1;
     static String configFile = "";
     public static bool _testing = false;
     public static bool _singlesMode = false;
     public static bool _puntualMode = false;
     public static String me = "0";
+    public static CSGSI.Nodes.PlayerNode myNode;
     // could check gs.Provider.SteamID
+    public static CSGSI.GameState gameState = new CSGSI.GameState("");
+    public static List<CSGSI.Nodes.PlayerNode> players = new List<CSGSI.Nodes.PlayerNode>();
+    public static List<string> teamMates = new List<string>();
 
     /// <summary>
     /// A fancy log method, 0 = INFO, 1 = ERROR, 2 = WARN
@@ -33,24 +46,24 @@ public static class Utils
     public static void log(byte mode, string data)
     {
         var t = DateTime.Now.ToString("HH':'mm':'ss");
-        if (mode == 1)
+        switch (mode)
         {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"[{t}] + {data}");
-        }
-        else if (mode == 2)
-        {
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine($"[{t}] * {data}");
-        }
-        else
-        {
-            Console.WriteLine($"[{t}] - {data}");
+            case 1:
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"[{t}] + {data}");
+                break;
+            case 2:
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine($"[{t}] * {data}");
+                break;
+            default:
+                Console.WriteLine($"[{t}] - {data}");
+                break;
         }
         Console.ForegroundColor = ConsoleColor.White;
     }
-    public static Action<string> echo = s => client.WriteLine($"echo {s}");
-    public static Action<string> run = s => client.WriteLine(s);
+    public static Action<string> echo = s => client.WriteLine($"echo {s}\n");
+    public static Action<string> run = s => client.WriteLine($"{s}\n");
 
     /// <summary>
     /// Dumb wrapper for sleep method
@@ -63,7 +76,7 @@ public static class Utils
 
     static void InitTimer()
     {
-        timer1 = new System.Timers.Timer(778);
+        timer1 = new System.Timers.Timer(800);
         timer1.Elapsed += speakBuffer;
         timer1.Enabled = false;
     }
@@ -124,14 +137,98 @@ public static class Utils
     }
 
     /// <summary>
+    /// load teammates
+    /// </summary>
+    public static void readMates(CSGSI.Events.RoundPhaseChangedEventArgs e)
+    {
+        players.Clear();
+        players.ForEach(p =>
+        {
+            if (myNode.Team == p.Team)
+                teamMates.Add(p.Name);
+        });
+    }
+
+
+    /// <summary>
+    /// attempts to find friendly name from string given
+    /// </summary>
+    public static bool isFriendHere(string toParse)
+    {
+        for (byte i = 0; i < teamMates.Count; i++)
+        {
+            if (toParse.IndexOf(teamMates[i]) > -1)
+                return true;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// atrocious
+    /// </summary>
+    public static async void rconParser()
+    {
+        while (client.IsConnected)
+        {
+            string rawOutput = await client.ReadAsync();
+            if (rawOutput.Length > 0)
+            {
+                Console.Write(rawOutput);
+                // this shit needs a check if a person is a teammate...
+                // to figure out: find first and last " and inbetween is player name
+                int indexOne = rawOutput.IndexOf(" - Damage Given\r\n-------------------------"); // 13
+                if (indexOne > -1)
+                {
+                    rawOutput = rawOutput.Substring(indexOne + 44);
+                    string[] outputLines = rawOutput.Split("\r\n");
+                    string final = "";
+                    for (ushort i = 0; i < outputLines.Length - 1; i++)
+                    {
+                        if (isFriendHere(outputLines[i]))
+                            continue;
+                        int indexTwo = outputLines[i].LastIndexOf("-");
+                        if (indexTwo > -1)
+                        {
+                            if (outputLines[i].IndexOf("hit") > -1)
+                            {
+                                outputLines[i] = outputLines[i].Substring(indexTwo + 2);
+                                outputLines[i] = outputLines[i].Substring(0, outputLines[i].IndexOf(" "));
+                                if (Char.Parse(outputLines[i]) < 100 || Char.Parse(outputLines[i]) > 15)
+                                    final += $"-{outputLines[i]} ";
+                            }
+                        }
+                    }
+                    //thingsToSay.Enqueue(final); // "It just works" -Todd Howard
+                }
+            }
+        }
+    }
+    /// <summary>
+    /// Returns if the game is live
+    /// </summary>
+    public static bool bGameActive(CSGSI.GameState gs)
+    {
+        try
+        {
+            return ((gs.Round.Phase.ToString().ToLower() == "live"
+            || gs.Round.Phase.ToString().ToLower() == "over")
+            && (gs.Map.Phase.ToString().ToLower() == "live"
+            || gs.Map.Phase.ToString().ToLower() == "intermission"));
+        }
+        catch (System.Exception)
+        {
+            return false;
+        }
+    }
+
+    /// <summary>
     /// Set style of console window and initialises variables
     /// </summary>
     public static void Init()
     {
-        Console.Clear();
         Console.Title = "Project loudmouth";
-        Console.SetWindowSize(56, 15);
-        Console.SetBufferSize(56, 15);
+        //Console.SetWindowSize(56, 15);
+        //Console.SetBufferSize(56, 15);
         Console.ForegroundColor = ConsoleColor.White;
         if (!readConfig()) Environment.Exit(1);
         while (!client.IsConnected)
@@ -139,9 +236,22 @@ public static class Utils
             log(2, "Awaiting RCON connection...");
             sleep(2000);
         } // probably bad
-        if (client.IsConnected) log(0, "RCON Connected!");
+        if (client.IsConnected) echo("[RCON CONNECTED!!]");
         me = getMyCommunityID();
         InitTimer();
+        Thread logger = new Thread((new ThreadStart(rconParser)));
+        logger.Start();
+        /* 
+        if (bGameActive(gameState))
+        {
+            players.AddRange(gameState.AllPlayers.PlayerList);
+            players.ForEach(p =>
+            {
+                if (p.SteamID == me)
+                    myNode = p;
+            });
+        }*/
+
         if (_testing)
         {
             Console.Title = $"[dev] {Console.Title} ({me})";

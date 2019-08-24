@@ -2,7 +2,6 @@
 A product of curiosity and boredom.
 
 A kill/death announcer in chat for CSGO. Works by listening to the game's [Game State Intergration](https://developer.valvesoftware.com/wiki/Counter-Strike:_Global_Offensive_Game_State_Integration) updates.
-Messages are sent to a config file which is executed when an event occurs, then cleared.
 
 Powered by [CSGSI by rakijah](https://github.com/rakijah/CSGSI)
 
@@ -11,8 +10,7 @@ Powered by [CSGSI by rakijah](https://github.com/rakijah/CSGSI)
 - .NET Framework of sorts - I wrote this with dotnet core so idk ¯\\_(ツ)_/¯
 
 ### Install & Usage
-- Create `cheese.cfg` in your `{csgo path here}/cfg` folder, preferred if it was empty
-- `bind RSHIFT "exec cheese"` in CSGO console
+- `-netconport 2121` to CS:GO launch options
 - `dotnet run` to run
 - `dotnet run dev` to run silently (outputs to terminal, not csgo)
 
@@ -22,7 +20,7 @@ Powered by [CSGSI by rakijah](https://github.com/rakijah/CSGSI)
 - Parses the json package to find if you got a kill or death
 - Picks a random cheesy line from a list 
 - Prepends "say" to it so it's a valid CSGO console command
-- Presses right shift to execute script
+- Sends generated text to remote console for execution
 
 ### Results
 ![results](https://github.com/jauhc/loudmouth/raw/master/rk_l.jpg)
@@ -32,4 +30,4 @@ the whole multikill jazz
 
 
 ### Disclaimer
-There is *nothing* here that could trigger a ban, the low level keyboard input is nothing compared to random programs opening handles
+There is *nothing* here that could trigger a ban, the remote console is Valve's own addition to the Source engine.
