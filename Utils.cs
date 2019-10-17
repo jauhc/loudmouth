@@ -158,6 +158,7 @@ public static class Utils
     /// <summary>
     /// atrocious
     /// </summary>
+    public static string msgCode = "‎ : "; // DONT TOUCH OR WE ALL DIE
     public static async void rconParser()
     {
         while (client.IsConnected)
@@ -169,7 +170,16 @@ public static class Utils
                 Console.Write(rawOutput);
                 // add check here for IF WE WANT TO TELL DMG DONE
                 damageDone(rawOutput);
-                if (rawOutput.IndexOf("‎ : ") > -1) { // big unicode here beware
+                int codeAt = rawOutput.IndexOf(msgCode);
+                if (codeAt > -1)
+                { // REFACTOR PLS
+                    var caller = rawOutput.Trim();
+                    caller = caller.Substring(0, caller.LastIndexOf(msgCode)).Trim();
+                    caller = caller.Substring(caller.LastIndexOf('\n')).Trim();
+                    caller = caller.Substring(0, caller.Length - 3);
+                    var message = rawOutput.Substring(codeAt + 3);
+
+                    log(2, $"caller id [{caller}] says: {message}");
                     // chat message triggered
                 }
             }
