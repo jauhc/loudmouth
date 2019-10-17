@@ -174,8 +174,6 @@ public static class Utils
             if (rawOutput.Length > 0)
             {
                 Console.Write(rawOutput);
-                // this shit needs a check if a person is a teammate...
-                // to figure out: find first and last " and inbetween is player name
                 int indexOne = rawOutput.IndexOf(" - Damage Given\r\n-------------------------"); // 13
                 if (indexOne > -1)
                 {
@@ -198,6 +196,7 @@ public static class Utils
                             }
                         }
                     }
+                    echo(final);
                     //thingsToSay.Enqueue(final); // "It just works" -Todd Howard
                 }
             }
