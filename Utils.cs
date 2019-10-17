@@ -167,35 +167,41 @@ public static class Utils
             {
                 // add check here for IF WE WANT TO TELL DMG DONE
                 // also this should become the main handler for console output, therefore moving dmg done to another func
-                Console.Write(rawOutput);
-                int indexOne = rawOutput.IndexOf(" - Damage Given\r\n-------------------------"); // 13
-                if (indexOne > -1)
-                {
-                    rawOutput = rawOutput.Substring(indexOne + 44);
-                    string[] outputLines = rawOutput.Split("\r\n");
-                    string final = "";
-                    for (ushort i = 0; i < outputLines.Length - 1; i++)
-                    {
-                        if (isFriendHere(outputLines[i]))
-                            continue;
-                        int indexTwo = outputLines[i].LastIndexOf("-");
-                        if (indexTwo > -1)
-                        {
-                            if (outputLines[i].IndexOf("hit") > -1)
-                            {
-                                outputLines[i] = outputLines[i].Substring(indexTwo + 2);
-                                outputLines[i] = outputLines[i].Substring(0, outputLines[i].IndexOf(" "));
-                                if (Char.Parse(outputLines[i]) < 100 || Char.Parse(outputLines[i]) > 15)
-                                    final += $"-{outputLines[i]} ";
-                            }
-                        }
-                    }
-                    echo(final);
-                    //thingsToSay.Enqueue(final); // "It just works" -Todd Howard
-                }
+                damageDone(rawOutput);
             }
         }
     }
+
+    public static void damageDone(string data)
+    {
+        Console.Write(data);
+        int indexOne = data.IndexOf(" - Damage Given\r\n-------------------------"); // 13
+        if (indexOne > -1)
+        {
+            data = data.Substring(indexOne + 44);
+            string[] outputLines = data.Split("\r\n");
+            string final = "";
+            for (ushort i = 0; i < outputLines.Length - 1; i++)
+            {
+                if (isFriendHere(outputLines[i]))
+                    continue;
+                int indexTwo = outputLines[i].LastIndexOf("-");
+                if (indexTwo > -1)
+                {
+                    if (outputLines[i].IndexOf("hit") > -1)
+                    {
+                        outputLines[i] = outputLines[i].Substring(indexTwo + 2);
+                        outputLines[i] = outputLines[i].Substring(0, outputLines[i].IndexOf(" "));
+                        if (Char.Parse(outputLines[i]) < 100 || Char.Parse(outputLines[i]) > 15)
+                            final += $"-{outputLines[i]} ";
+                    }
+                }
+            }
+            echo(final);
+            //thingsToSay.Enqueue(final); // "It just works" -Todd Howard
+        }
+    }
+
     /// <summary>
     /// Returns if the game is live
     /// </summary>
