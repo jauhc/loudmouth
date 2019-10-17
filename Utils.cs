@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Timers;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using PrimS.Telnet;
@@ -9,14 +10,13 @@ using PrimS.Telnet;
 Purpose of file:
     this file contains the
     small things that make this work
- */
-
+*/
 /*
     todo:
         chat message parser
         cnurses styled UI for console window for controls / options
 
- */
+*/
 public static class Utils
 {
     public static PrimS.Telnet.Client client = new PrimS.Telnet.Client("localhost", 2121, new System.Threading.CancellationToken());
@@ -163,18 +163,21 @@ public static class Utils
         while (client.IsConnected)
         {
             string rawOutput = await client.ReadAsync();
+
             if (rawOutput.Length > 0)
             {
+                Console.Write(rawOutput);
                 // add check here for IF WE WANT TO TELL DMG DONE
-                // also this should become the main handler for console output, therefore moving dmg done to another func
                 damageDone(rawOutput);
+                if (rawOutput.IndexOf("‎ : ") > -1) { // big unicode here beware
+                    // chat message triggered
+                }
             }
         }
     }
 
     public static void damageDone(string data)
     {
-        Console.Write(data);
         int indexOne = data.IndexOf(" - Damage Given\r\n-------------------------"); // 13
         if (indexOne > -1)
         {
