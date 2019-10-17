@@ -5,11 +5,12 @@ A kill/death announcer in chat for CSGO. Works by listening to the game's [Game 
 
 Powered by [CSGSI by rakijah](https://github.com/rakijah/CSGSI)
 
-### Requirements
+### Prerequisites
 - CSGO
-- .NET Framework of sorts - I wrote this with dotnet core so idk ¯\\_(ツ)_/¯
+- .NET Core SDK for compiling
 
 ### Install & Usage
+- Running .NET Core binaries requires some sort of .NET runtime unless statically compiled
 - `-netconport 2121` to CS:GO launch options
 - `dotnet run` to run
 - `dotnet run dev` to run silently (outputs to terminal, not csgo)
@@ -27,6 +28,8 @@ Powered by [CSGSI by rakijah](https://github.com/rakijah/CSGSI)
 
 #### todo list
 the whole multikill jazz
+chat message parser
+better UI (for the cli lol)
 
 
 ### Disclaimer
