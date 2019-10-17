@@ -12,17 +12,9 @@ Purpose of file:
  */
 
 /*
-   todo:
-   parse these
-    Player: jauhc - Damage Given
-        -------------------------
-        Damage Given to "Clarence" - 109 in 1 hit
-        Damage Given to "Oliver" - 61 in 2 hits
-        Damage Given to "Wally" - 110 in 1 hit
-        Damage Given to "Eugene" - 132 in 2 hits
-        Damage Given to "Graham" - 41 in 2 hits
-        Player: jauhc - Damage Taken
-        -------------------------
+    todo:
+        chat message parser
+        cnurses styled UI for console window for controls / options
 
  */
 public static class Utils
@@ -173,6 +165,8 @@ public static class Utils
             string rawOutput = await client.ReadAsync();
             if (rawOutput.Length > 0)
             {
+                // add check here for IF WE WANT TO TELL DMG DONE
+                // also this should become the main handler for console output, therefore moving dmg done to another func
                 Console.Write(rawOutput);
                 int indexOne = rawOutput.IndexOf(" - Damage Given\r\n-------------------------"); // 13
                 if (indexOne > -1)
