@@ -13,8 +13,9 @@ Purpose of file:
 */
 /*
     todo:
-        chat message parser
-        cnurses styled UI for console window for controls / options
+        ACTUAL CONTROLS FOR OPTIONS??
+        !commands
+        !req <youtube url>
 
 */
 public static class Utils
@@ -155,6 +156,44 @@ public static class Utils
         return false;
     }
 
+    private static int pooperFind(this string s, char t)
+    {
+        int poop = s.IndexOf(t);
+        if (poop > -1)
+            return poop;
+        return s.Length;
+    }
+
+    private static int poopyFind(this string s, char t)
+    {
+        int poop = s.LastIndexOf(t);
+        if (poop > -1)
+            return poop;
+        return s.Length;
+    }
+
+    public static void chatParser(string data)
+    {
+        int codeAt = data.IndexOf(msgCode);
+        if (codeAt > -1)
+        { // REFACTOR PLS
+          // to figure out: how to get rid of *DEAD*
+            var caller = data.Trim();
+            var dial = caller.Split('\n');
+            for (int i = 0; i < dial.Length; i++)
+            {
+                if (dial[i].IndexOf(msgCode) > -1)
+                    caller = dial[i];
+            }
+            var message = caller.Substring(caller.pooperFind(':') + 2);
+            caller = caller.Substring(0, caller.pooperFind(':') - 4);
+
+            log(2, $"caller id [{caller}] says: {message}");
+            if (message.IndexOf("!roll") > -1)
+                echo("not yet implemented lole!");
+        }
+    }
+
     /// <summary>
     /// atrocious
     /// </summary>
@@ -170,18 +209,7 @@ public static class Utils
                 Console.Write(rawOutput);
                 // add check here for IF WE WANT TO TELL DMG DONE
                 damageDone(rawOutput);
-                int codeAt = rawOutput.IndexOf(msgCode);
-                if (codeAt > -1)
-                { // REFACTOR PLS
-                    var caller = rawOutput.Trim();
-                    caller = caller.Substring(0, caller.LastIndexOf(msgCode)).Trim();
-                    caller = caller.Substring(caller.LastIndexOf('\n')).Trim();
-                    caller = caller.Substring(0, caller.Length - 3);
-                    var message = rawOutput.Substring(codeAt + 3);
-
-                    log(2, $"caller id [{caller}] says: {message}");
-                    // chat message triggered
-                }
+                chatParser(rawOutput);
             }
         }
     }
