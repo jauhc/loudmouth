@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Timers;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
-using PrimS.Telnet;
 
 /*
 Purpose of file:
@@ -176,7 +174,7 @@ public static class Utils
     {
         int codeAt = data.IndexOf(msgCode);
         if (codeAt > -1)
-        { // REFACTOR PLS
+        {
           // to figure out: how to get rid of *DEAD*
             var caller = data.Trim();
             var dial = caller.Split('\n');
