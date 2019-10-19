@@ -17,7 +17,6 @@ namespace loudmouth
         static int playerKills = -64;
         static int roundHS = -64;
         static int myDeaths = -1;
-        static Random rng = new Random();
 
         /// <summary>
         /// Insert point, launch paramters; dev = log to console only, s = simple mode
@@ -193,8 +192,8 @@ namespace loudmouth
                 });
             }
 
-            String dad = cheese[rng.Next(cheese.Count)];
-            if (rng.Next(100) > 50) // 50% chance
+            String dad = cheese[Utils.rng.Next(cheese.Count)];
+            if (Utils.rng.Next(100) > 50) // 50% chance
             {
                 var postfix = new List<string> {
                     " kid",
@@ -202,7 +201,7 @@ namespace loudmouth
                     " nerd",
                     " geek"
                     };
-                dad += postfix[rng.Next(postfix.Count)];
+                dad += postfix[Utils.rng.Next(postfix.Count)];
             }
             Utils.owo(dad + Environment.NewLine + "enemydown");
         }
@@ -237,7 +236,7 @@ namespace loudmouth
                 "omg 64 tick"
                     });
             }
-            String dad = cheese[rng.Next(cheese.Count)];
+            String dad = cheese[Utils.rng.Next(cheese.Count)];
             Utils.owo(dad);
         }
 

@@ -21,6 +21,7 @@ public static class Utils
     public static PrimS.Telnet.Client client = new PrimS.Telnet.Client("localhost", 2121, new System.Threading.CancellationToken());
     static System.Timers.Timer timer1;
     static String configFile = "";
+    public static readonly Random rng = new Random();
     public static bool _testing = false;
     public static bool _singlesMode = false;
     public static bool _puntualMode = false;
@@ -170,12 +171,26 @@ public static class Utils
         return s.Length;
     }
 
+
+    private static void chatCommand(string sender, string message)
+    {
+        if (message.IndexOf("!help") > -1)
+        {
+            owo("commands available: !random");
+        }
+        else if (message.IndexOf("!random") > -1)
+        {
+            owo($"{sender} you have rolled {rng.Next(1,100)}!");
+        }
+    }
+
+    public static string msgCode = "‎ : "; // DONT TOUCH OR WE ALL DIE
     public static void chatParser(string data)
     {
         int codeAt = data.IndexOf(msgCode);
         if (codeAt > -1)
         {
-          // to figure out: how to get rid of *DEAD*
+            // to figure out: how to get rid of *DEAD*
             var caller = data.Trim();
             var dial = caller.Split('\n');
             for (int i = 0; i < dial.Length; i++)
@@ -195,7 +210,6 @@ public static class Utils
     /// <summary>
     /// atrocious
     /// </summary>
-    public static string msgCode = "‎ : "; // DONT TOUCH OR WE ALL DIE
     public static async void rconParser()
     {
         while (client.IsConnected)
