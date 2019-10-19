@@ -155,6 +155,9 @@ public static class Utils
         return false;
     }
 
+    /// <summary>
+    /// bad find
+    /// </summary>
     private static int pooperFind(this string s, char t)
     {
         int poop = s.IndexOf(t);
@@ -163,6 +166,9 @@ public static class Utils
         return s.Length;
     }
 
+    /// <summary>
+    /// bad reverse find
+    /// </summary>
     private static int poopyFind(this string s, char t)
     {
         int poop = s.LastIndexOf(t);
