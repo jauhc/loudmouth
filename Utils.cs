@@ -118,6 +118,8 @@ public static class Utils
                 var path = item.ToString().Replace("\"", "");
                 if (System.IO.File.Exists($"{path}\\steamapps\\appmanifest_730.acf"))
                 {
+                    // todo here:
+                    // create a GSI config file if not already present
                     configFile = $"{path}\\steamapps\\common\\Counter-Strike Global Offensive\\csgo\\cfg\\cheese.cfg";
                     log(0, "Found install path with magic!");
                     if (_testing) log(0, configFile);
@@ -182,11 +184,21 @@ public static class Utils
     {
         if (message.IndexOf("!help") > -1)
         {
+            if (_testing)
+            {
+                echo("commands available: !random");
+                return;
+            }
             owo("commands available: !random");
         }
         else if (message.IndexOf("!random") > -1)
         {
-            owo($"{sender} you have rolled {rng.Next(1,100)}!");
+            if (_testing)
+            {
+                echo($"{sender} you have rolled {rng.Next(1, 100)}!");
+                return;
+            }
+            owo($"{sender} you have rolled {rng.Next(1, 100)}!");
         }
     }
 
