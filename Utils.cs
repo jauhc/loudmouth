@@ -20,7 +20,6 @@ public static class Utils
 {
     public static PrimS.Telnet.Client client = new PrimS.Telnet.Client("localhost", 2121, new System.Threading.CancellationToken());
     static System.Timers.Timer timer1;
-    static String configFile = "";
     public static readonly Random rng = new Random();
     public static bool _testing = false;
     public static bool _singlesMode = false;
@@ -92,38 +91,29 @@ public static class Utils
 
     /// <summary>
     /// Read config and shit, warns and stuff if somethings wrong
-    /// The file config.txt overrides automatic detection
     /// </summary>
     static bool readConfig()
     {
-        if (System.IO.File.Exists("config.txt"))
-        {
-            configFile = System.IO.File.ReadAllText("config.txt").Trim();
-            if (System.IO.File.Exists(configFile))
-                log(0, "cfg file found!");
-            else
-            {
-                log(1, "config.txt found but cheese.cfg does not exist?");
-                return false;
-            }
-        }
-
+        string blob = "\"loudmouth\"\n{\n\t\"uri\" \"http://localhost:1338\"\n\t\"timeout\" \"5.0\"\n\t\"buffer\"  \"0.05\"\n\t\"throttle\" \"0.1\"\n\t\"heartbeat\" \"3.0\"\n\t\"data\"\n\t{\n\t\t\"provider\"\t\t\t\t\t\"1\"\n\t\t\"map\"\t\t\t\t\t\t\"1\"\n\t\t\"round\"\t\t\t\t\t\t\"1\"\n\t\t\"player_id\"\t\t\t\t\t\"1\"\n\t\t\"player_weapons\"\t\t\t\"1\"\n\t\t\"player_match_stats\"\t\t\"1\"\n\t\t\"player_state\"\t\t\t\t\"1\"\n\t\t\"allplayers_id\"\t\t\t\t\"1\"\n\t\t\"allplayers_state\"\t\t\t\"1\"\n\t\t\"allplayers_match_stats\"\t\"1\"\n\t}\n}";
         var steamRegv = Microsoft.Win32.Registry.GetValue("HKEY_CURRENT_USER\\Software\\Valve\\Steam\\", "SteamPath", 0);
-        var libraryFile = System.IO.File.ReadAllText($"{steamRegv}\\steamapps\\libraryfolders.vdf").Trim();
-        var regx = new Regex("\".*?\"");
+        string libraryFile = System.IO.File.ReadAllText($"{steamRegv}\\steamapps\\libraryfolders.vdf").Trim();
+        string configFile = "";
+        Regex regx = new Regex("\".*?\"");
         var matches = regx.Matches(libraryFile);
         foreach (var item in matches)
         {
             if (item.ToString().Contains("\\"))
             {
-                var path = item.ToString().Replace("\"", "");
+                string path = item.ToString().Replace("\"", "");
                 if (System.IO.File.Exists($"{path}\\steamapps\\appmanifest_730.acf"))
                 {
-                    // todo here:
-                    // create a GSI config file if not already present
-                    configFile = $"{path}\\steamapps\\common\\Counter-Strike Global Offensive\\csgo\\cfg\\cheese.cfg";
+                    string cfgFolder = $"{path}\\steamapps\\common\\Counter-Strike Global Offensive\\csgo\\cfg";
+                    // sort of sanity check if config.cfg is present to make sure its the correct dir
+                    configFile = $"{cfgFolder}\\gamestate_integration_loudmouth.cfg";
+                    if (System.IO.File.Exists($"{cfgFolder}\\config.cfg"))
+                        if (!System.IO.File.Exists(configFile))
+                            System.IO.File.WriteAllText(configFile, blob);
                     log(0, "Found install path with magic!");
-                    if (_testing) log(0, configFile);
                     return true;
                 }
             }
