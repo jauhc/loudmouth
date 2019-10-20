@@ -16,11 +16,20 @@ Purpose of file:
         !req <youtube url>
 
 */
+public class Settings
+{
+    public bool state = true;
+    public bool owo = true;
+    public bool kills = true;
+    public bool deaths = true;
+    public bool greets = true;
+}
 public static class Utils
 {
     public static PrimS.Telnet.Client client = new PrimS.Telnet.Client("localhost", 2121, new System.Threading.CancellationToken());
     static System.Timers.Timer timer1;
     public static readonly Random rng = new Random();
+    public static readonly string cmdHash = terribleHash(14); // for command verification purposes
     public static bool _testing = false;
     public static bool _singlesMode = false;
     public static bool _puntualMode = false;
@@ -31,6 +40,7 @@ public static class Utils
     public static CSGSI.GameState gameState = new CSGSI.GameState("");
     public static List<CSGSI.Nodes.PlayerNode> players = new List<CSGSI.Nodes.PlayerNode>();
     public static List<string> teamMates = new List<string>();
+    public static Settings settings = new Settings();
 
     /// <summary>
     /// A fancy log method, 0 = INFO, 1 = ERROR, 2 = WARN
@@ -54,7 +64,7 @@ public static class Utils
         }
         Console.ForegroundColor = ConsoleColor.White;
     }
-    public static Action<string> echo = s => client.WriteLine($"echo {s}\n");
+    public static Action<string> echo = s => client.WriteLine($"echo [Loudmouth] - {s}\n");
     public static Action<string> run = s => client.WriteLine($"{s}\n");
 
     /// <summary>
@@ -92,7 +102,7 @@ public static class Utils
     /// <summary>
     /// Read config and shit, warns and stuff if somethings wrong
     /// </summary>
-    static bool readConfig()
+    static string readConfig()
     {
         string blob = "\"loudmouth\"\n{\n\t\"uri\" \"http://localhost:1338\"\n\t\"timeout\" \"5.0\"\n\t\"buffer\"  \"0.05\"\n\t\"throttle\" \"0.1\"\n\t\"heartbeat\" \"3.0\"\n\t\"data\"\n\t{\n\t\t\"provider\"\t\t\t\t\t\"1\"\n\t\t\"map\"\t\t\t\t\t\t\"1\"\n\t\t\"round\"\t\t\t\t\t\t\"1\"\n\t\t\"player_id\"\t\t\t\t\t\"1\"\n\t\t\"player_weapons\"\t\t\t\"1\"\n\t\t\"player_match_stats\"\t\t\"1\"\n\t\t\"player_state\"\t\t\t\t\"1\"\n\t\t\"allplayers_id\"\t\t\t\t\"1\"\n\t\t\"allplayers_state\"\t\t\t\"1\"\n\t\t\"allplayers_match_stats\"\t\"1\"\n\t}\n}";
         var steamRegv = Microsoft.Win32.Registry.GetValue("HKEY_CURRENT_USER\\Software\\Valve\\Steam\\", "SteamPath", 0);
@@ -110,15 +120,18 @@ public static class Utils
                     string cfgFolder = $"{path}\\steamapps\\common\\Counter-Strike Global Offensive\\csgo\\cfg";
                     // sort of sanity check if config.cfg is present to make sure its the correct dir
                     configFile = $"{cfgFolder}\\gamestate_integration_loudmouth.cfg";
-                    if (System.IO.File.Exists($"{cfgFolder}\\config.cfg"))
+                    log(2, $"{cfgFolder}\\config.cfg");
+                    if (System.IO.File.Exists($"{cfgFolder}\\settings_default.scr"))
+                    {
                         if (!System.IO.File.Exists(configFile))
                             System.IO.File.WriteAllText(configFile, blob);
-                    log(0, "Found install path with magic!");
-                    return true;
+                        log(0, "Found install path with magic!");
+                        return cfgFolder;
+                    }
                 }
             }
         }
-        return false;
+        return "";
     }
 
     /// <summary>
@@ -203,7 +216,35 @@ public static class Utils
     }
 
     /// <summary>
-    ///
+    /// creates aliases for controls
+    /// </summary>
+    private static void createAliases(string path)
+    {
+        run($"setinfo loud_owo_off \"\"");
+        run($"alias loud_owo_off \"echo 0 OWO {cmdHash}\"");
+        run($"setinfo loud_owo_on \"\"");
+        run($"alias loud_owo_on \"echo 1 OWO {cmdHash}\"");
+
+        run($"setinfo loud_kills_off \"\"");
+        run($"alias loud_kills_off \"echo 0 KILLS {cmdHash}\"");
+        run($"setinfo loud_kills_on \"\"");
+        run($"alias loud_kills_on \"echo 1 KILLS {cmdHash}\"");
+
+        run($"setinfo loud_death_off \"\"");
+        run($"alias loud_death_off \"echo 0 DETH {cmdHash}\"");
+        run($"setinfo loud_death_on \"\"");
+        run($"alias loud_death_on \"echo 1 DETH {cmdHash}\"");
+
+        run($"setinfo loud_greet_off \"\"");
+        run($"alias loud_greet_off \"echo 0 GREET {cmdHash}\"");
+        run($"setinfo loud_greet_on \"\"");
+        run($"alias loud_greet_on \"echo 1 GREET {cmdHash}\"");
+
+        echo("Commands created!");
+    }
+
+    /// <summary>
+    /// list of chat commands bla bla
     /// </summary>
     private static void chatCommand(string sender, string message)
     {
@@ -245,6 +286,37 @@ public static class Utils
         */
     }
 
+    /// <summary>
+    /// checks when user sets commands from console
+    /// </summary>
+    private static void checkCvars(string[] data)
+    {
+        bool set = (data[0] == "1") ? true : false;
+        switch (data[1])
+        {
+            case "OWO":
+                settings.owo = set;
+                break;
+
+            case "KILLS":
+                settings.kills = set;
+                break;
+
+            case "DETH":
+                settings.deaths = set;
+                break;
+
+            case "GREET":
+                settings.greets = set;
+                break;
+
+            default:
+                echo("somehow you broke the settings?");
+                break;
+        }
+        echo(set ? $"{data[1]} enabled!" : $"{data[1]} disabled!");
+    }
+
     public static string msgCode = "‎ : "; // DONT TOUCH OR WE ALL DIE
     public static void chatParser(string data)
     {
@@ -283,6 +355,10 @@ public static class Utils
                 // add check here for IF WE WANT TO TELL DMG DONE
                 damageDone(rawOutput);
                 chatParser(rawOutput);
+
+                int hashIdx = rawOutput.IndexOf(cmdHash);
+                if (hashIdx > -1)
+                    checkCvars(rawOutput.Substring(0, hashIdx).Split(' '));
             }
         }
     }
@@ -346,16 +422,18 @@ public static class Utils
         //Console.SetWindowSize(56, 15);
         //Console.SetBufferSize(56, 15);
         Console.ForegroundColor = ConsoleColor.White;
-        if (!readConfig()) Environment.Exit(1);
+        string cfg = readConfig();
+        if (cfg == "") Environment.Exit(1);
         while (!client.IsConnected)
         {
             log(2, "Awaiting RCON connection...");
             sleep(2000);
         } // probably bad
-        if (client.IsConnected) echo("[RCON CONNECTED!!]");
+        if (client.IsConnected) echo("RCON Connected!");
         me = getMyCommunityID();
         InitTimer();
         cookPasta();
+        createAliases(cfg);
         Thread logger = new Thread((new ThreadStart(rconParser)));
         logger.Start();
         /* 
@@ -422,5 +500,16 @@ public static class Utils
                 sb.Append(i);
 
         return sb.ToString();
+    }
+    public static string terribleHash(int length)
+    {
+        Random random = new Random();
+        string characters = "iIl1O0oB85S|!";
+        System.Text.StringBuilder result = new System.Text.StringBuilder(length);
+        for (int i = 0; i < length; i++)
+        {
+            result.Append(characters[random.Next(characters.Length)]);
+        }
+        return result.ToString();
     }
 }

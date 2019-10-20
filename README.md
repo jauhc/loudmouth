@@ -27,9 +27,8 @@ Powered by [CSGSI by rakijah](https://github.com/rakijah/CSGSI)
 ![results](https://github.com/jauhc/loudmouth/raw/master/rk_l.jpg)
 
 #### todo list
-the whole multikill jazz
-chat message parser
-better UI (for the cli lol)
+the whole multikill jazz,
+finding install location on linux
 
 
 ### Disclaimer
