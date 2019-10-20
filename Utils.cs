@@ -25,6 +25,7 @@ public static class Utils
     public static bool _testing = false;
     public static bool _singlesMode = false;
     public static bool _puntualMode = false;
+    public static bool pastaCooked = false;
     public static String me = "0";
     public static CSGSI.Nodes.PlayerNode myNode;
     // could check gs.Provider.SteamID
@@ -183,7 +184,8 @@ public static class Utils
     private static void cookPasta()
     {
         uwuPasta.AddRange(new[] {
-            "rawr x3 nuzzles how are you pounces on you you're so warm ",
+            "rawr x3 nuzzles how are you",
+            "pounces on you you're so warm",
             "o3o notices you have a bulge o: someone's happy ;)",
             "nuzzles your necky wecky~ murr~ hehehe",
             "rubbies your bulgy wolgy you're so big :oooo",
@@ -207,6 +209,7 @@ public static class Utils
             "suckles on your tip so good licks pre of your cock salty goodness~",
             "eyes role back and goes balls deep mmmm~ moans and suckles"
         });
+        pastaCooked = true;
     }
 
     /// <summary>
@@ -232,6 +235,8 @@ public static class Utils
             }
             owo($"{sender} you have rolled {rng.Next(1, 100)} (1-100)!");
         }
+        else if (message.IndexOf("owo") > -1 || message.IndexOf("uwu") > -1)
+            owo(uwuPasta[rng.Next(0, uwuPasta.Count)]);
         else if (message.IndexOf("hi") > -1)
             owo(message);
         else if (message.IndexOf("hey") > -1)
@@ -274,7 +279,7 @@ public static class Utils
     }
 
     /// <summary>
-    /// atrocious
+    /// atrocious - but it works
     /// </summary>
     public static async void rconParser()
     {
@@ -292,6 +297,9 @@ public static class Utils
         }
     }
 
+    /// <summary>
+    /// parses damage done
+    /// </summary>
     public static void damageDone(string data)
     {
         int indexOne = data.IndexOf(" - Damage Given\r\n-------------------------"); // 13
@@ -317,7 +325,7 @@ public static class Utils
                 }
             }
             echo(final);
-            //thingsToSay.Enqueue(final); // "It just works" -Todd Howard
+            //owo(final); // "It just works" -Todd Howard
         }
     }
 
