@@ -64,6 +64,14 @@ public static class Utils
         }
         Console.ForegroundColor = ConsoleColor.White;
     }
+
+    /// <summary>
+    /// simpler override for log
+    /// </summary>
+    public static void log(string data)
+    {
+        log(0, data);
+    }
     public static Action<string> echo = s => client.WriteLine($"echo [Loudmouth] - {s}\n");
     public static Action<string> run = s => client.WriteLine($"{s}\n");
 
@@ -91,7 +99,7 @@ public static class Utils
     {
         if (_testing)
         {
-            log(0, thingsToSay.Dequeue());
+            log(thingsToSay.Dequeue());
             return;
         }
         run($"say {thingsToSay.Dequeue()}");
@@ -125,7 +133,7 @@ public static class Utils
                     {
                         if (!System.IO.File.Exists(configFile))
                             System.IO.File.WriteAllText(configFile, blob);
-                        log(0, "Found install path with magic!");
+                        log("Found install path with magic!");
                         return cfgFolder;
                     }
                 }
@@ -184,6 +192,10 @@ public static class Utils
     }
 
     private static List<string> uwuPasta = new List<string>();
+
+    /// <summary>
+    /// i must wash hands before i attend to cooking
+    /// </summary>
     private static void cookPasta()
     {
         uwuPasta.AddRange(new[] {
@@ -320,10 +332,10 @@ public static class Utils
     public static string msgCode = "‎ : "; // DONT TOUCH OR WE ALL DIE
     public static void chatParser(string data)
     {
-        int codeAt = data.IndexOf(msgCode);
-        if (codeAt > -1)
+        if (data.IndexOf(msgCode) > -1)
         {
             // to figure out: how to get rid of *DEAD*
+            // just remove it lol?
             var caller = data.Trim();
             var dial = caller.Split('\n');
             for (int i = 0; i < dial.Length; i++)
@@ -335,6 +347,7 @@ public static class Utils
             caller = caller.Substring(0, caller.pooperFind(':') - 4);
 
             log(2, $"caller id [{caller}] says: {message}");
+            chatCommand(caller, message);
             if (message.IndexOf("!roll") > -1)
                 echo("not yet implemented lole!");
         }
@@ -484,12 +497,12 @@ public static class Utils
             return "0";
         }
         String communityID = "7656" + (Convert.ToInt32(steam3ID) + 1197960265728).ToString();
-        Utils.log(0, $"Found active userid! ({communityID})");
+        log($"Found active userid! ({communityID})");
         return communityID;
     }
 
     /// <summary>
-    /// making a multiline string printable etc
+    /// (obsolete) making a multiline string printable etc
     /// </summary>
     public static string makePrintable(this string s)
     {
@@ -501,6 +514,10 @@ public static class Utils
 
         return sb.ToString();
     }
+
+    /// <summary>
+    /// terrible hash method in case if streamer uses so sniper cant mess with user
+    /// </summary>
     public static string terribleHash(int length)
     {
         string characters = "iIl|!o0O";

@@ -44,11 +44,11 @@ namespace loudmouth
             gsl.NewGameState += OnNewGameState;
             gsl.RoundPhaseChanged += Utils.readMates;
 
-            if (gsl.Running) Utils.log(0, "loud mouth online!");
-            if (Utils._testing) Utils.log(0, "dev mode on");
+            if (gsl.Running) Utils.log("loud mouth online!");
+            if (Utils._testing) Utils.log("dev mode on");
             // actual modes here, have them as `else if` so they dont mess with eachother
-            if (Utils._singlesMode) Utils.log(0, "simple output mode on");
-            else if (Utils._puntualMode) Utils.log(0, "punctual mode on");
+            if (Utils._singlesMode) Utils.log("simple output mode on");
+            else if (Utils._puntualMode) Utils.log("punctual mode on");
         }
 
         static bool isLocalPlayer(GameState gs)
