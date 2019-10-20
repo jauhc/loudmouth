@@ -503,12 +503,11 @@ public static class Utils
     }
     public static string terribleHash(int length)
     {
-        Random random = new Random();
-        string characters = "iIl1O0oB85S|!";
+        string characters = "iIl|!o0O";
         System.Text.StringBuilder result = new System.Text.StringBuilder(length);
         for (int i = 0; i < length; i++)
         {
-            result.Append(characters[random.Next(characters.Length)]);
+            result.Append(characters[rng.Next(characters.Length)]);
         }
         return result.ToString();
     }
