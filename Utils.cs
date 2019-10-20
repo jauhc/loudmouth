@@ -334,8 +334,6 @@ public static class Utils
     {
         if (data.IndexOf(msgCode) > -1)
         {
-            // to figure out: how to get rid of *DEAD*
-            // just remove it lol?
             var caller = data.Trim();
             var dial = caller.Split('\n');
             for (int i = 0; i < dial.Length; i++)
@@ -344,12 +342,10 @@ public static class Utils
                     caller = dial[i];
             }
             var message = caller.Substring(caller.pooperFind(':') + 2);
-            caller = caller.Substring(0, caller.pooperFind(':') - 4);
+            caller = caller.Substring(0, caller.pooperFind(':') - 4).Replace("*DEAD*", "").Trim();
 
             log(2, $"caller id [{caller}] says: {message}");
             chatCommand(caller, message);
-            if (message.IndexOf("!roll") > -1)
-                echo("not yet implemented lole!");
         }
     }
 
