@@ -5,7 +5,12 @@ using CSGSI.Events;
 using System.Runtime.InteropServices;
 using System.Timers;
 
-/* Main file */
+/*
+----------
+This file contains most simple code;
+ganestate intergration triggers and such
+----------
+*/
 
 namespace loudmouth
 {
@@ -100,32 +105,33 @@ namespace loudmouth
                     var curkills = gs.Player.MatchStats.Kills;
                     if (curkills > playerKills)
                     {
-                        for (int i = 0; i < (curkills - playerKills); i++)
-                        {
-                            if (Utils._puntualMode)
+                        if (Utils.settings.kills)
+                            for (int i = 0; i < (curkills - playerKills); i++)
                             {
-                                string o = $"Kill #{gs.Player.State.RoundKills} [Round {(gs.Map.Round + 1).ToString()}]";
-                                //o += $" [{gs.Player.Weapons.ActiveWeapon.Name.Substring(7).ToUpper()}]";
-                                //if (gs.Player.Weapons.ActiveWeapon.AmmoClipMax > 0) o+= $"({gs.Player.Weapons.ActiveWeapon.AmmoClip}/{gs.Player.Weapons.ActiveWeapon.AmmoClipMax}) ";
-                                if (gs.Player.State.RoundKillHS > roundHS)
+                                if (Utils._puntualMode)
                                 {
-                                    o += $" (HS)";
+                                    string o = $"Kill #{gs.Player.State.RoundKills} [Round {(gs.Map.Round + 1).ToString()}]";
+                                    //o += $" [{gs.Player.Weapons.ActiveWeapon.Name.Substring(7).ToUpper()}]";
+                                    //if (gs.Player.Weapons.ActiveWeapon.AmmoClipMax > 0) o+= $"({gs.Player.Weapons.ActiveWeapon.AmmoClip}/{gs.Player.Weapons.ActiveWeapon.AmmoClipMax}) ";
+                                    if (gs.Player.State.RoundKillHS > roundHS)
+                                    {
+                                        o += $" (HS)";
+                                    }
+                                    roundHS = gs.Player.State.RoundKillHS;
+                                    if (gs.Player.State.Flashed != 0)
+                                        o += $" / {Math.Round((double)(gs.Player.State.Flashed / (double)255) * 100, 1)}% flashed";
+                                    if (gs.Player.State.Smoked != 0)
+                                        o += $" / {Math.Round((double)(gs.Player.State.Smoked / (double)255) * 100, 1)}% smoked";
+                                    if (gs.Player.State.Burning != 0)
+                                        o += $" / {Math.Round((double)(gs.Player.State.Burning / (double)255) * 100, 1)}% burning";
+                                    o += $"{Environment.NewLine} enemydown";
+                                    Utils.owo(o);
                                 }
-                                roundHS = gs.Player.State.RoundKillHS;
-                                if (gs.Player.State.Flashed != 0)
-                                    o += $" / {Math.Round((double)(gs.Player.State.Flashed / (double)255) * 100, 1)}% flashed";
-                                if (gs.Player.State.Smoked != 0)
-                                    o += $" / {Math.Round((double)(gs.Player.State.Smoked / (double)255) * 100, 1)}% smoked";
-                                if (gs.Player.State.Burning != 0)
-                                    o += $" / {Math.Round((double)(gs.Player.State.Burning / (double)255) * 100, 1)}% burning";
-                                o += $"{Environment.NewLine} enemydown";
-                                Utils.owo(o);
+                                if (Utils._singlesMode)
+                                    Utils.owo("+" + Environment.NewLine + "enemydown");
+                                else if (!Utils._singlesMode && !Utils._puntualMode)
+                                    onKill(gs);
                             }
-                            if (Utils._singlesMode)
-                                Utils.owo("+" + Environment.NewLine + "enemydown");
-                            else if (!Utils._singlesMode && !Utils._puntualMode)
-                                onKill(gs);
-                        }
                     }
                     playerKills = curkills;
 
@@ -133,15 +139,16 @@ namespace loudmouth
                     if (myDeaths == -1)
                         myDeaths = gs.Player.MatchStats.Deaths;
                     var curDeaths = gs.Player.MatchStats.Deaths;
-                    if (curDeaths > myDeaths && !(gs.Map.Round == 1 && gs.Player.MatchStats.Deaths == 0))
-                    {
-                        if (Utils._puntualMode) // todo
-                            Utils.owo("oops i have died");
-                        if (Utils._singlesMode)
-                            Utils.owo("-");
-                        else if (!Utils._singlesMode && !Utils._puntualMode)
-                            onDeath(gs);
-                    }
+                    if (Utils.settings.deaths)
+                        if (curDeaths > myDeaths && !(gs.Map.Round == 1 && gs.Player.MatchStats.Deaths == 0))
+                        {
+                            if (Utils._puntualMode) // todo
+                                Utils.owo("oops i have died");
+                            if (Utils._singlesMode)
+                                Utils.owo("-");
+                            else if (!Utils._singlesMode && !Utils._puntualMode)
+                                onDeath(gs);
+                        }
                     myDeaths = curDeaths;
                 }
             oldState = gs;
@@ -184,7 +191,7 @@ namespace loudmouth
                 "ez",
                 "ezpz",
                 "you just got dabbed on!",
-                $"how u like the taste of my {gs.Player.Weapons.ActiveWeapon.Name.Substring(7)}?",
+                // $"how u like the taste of my {gs.Player.Weapons.ActiveWeapon.Name.Substring(7)}?", // crashes if dead right after killing
                 "owned",
                 "ownd",
                 "whats happening with you",

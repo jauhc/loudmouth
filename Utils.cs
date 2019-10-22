@@ -6,8 +6,8 @@ using System.Threading;
 
 /*
 Purpose of file:
-    this file contains the
-    small things that make this work
+    this file contains the small things that make this work
+    remote console parser and its methods
 */
 /*
     todo:
@@ -99,10 +99,12 @@ public static class Utils
     {
         if (_testing)
         {
-            log(thingsToSay.Dequeue());
-            return;
+            echo($"{thingsToSay.Dequeue()}");
         }
-        run($"say {thingsToSay.Dequeue()}");
+        else
+        {
+            run($"say {thingsToSay.Dequeue()}");
+        }
         if (thingsToSay.Count > 0) { timer1.Start(); timer1.Enabled = true; }
         if (thingsToSay.Count == 0) { timer1.Stop(); timer1.Enabled = true; }
     }
@@ -262,36 +264,32 @@ public static class Utils
     {
         if (message.IndexOf("!help") > -1)
         {
-            if (_testing)
-            {
-                echo("commands available: !random");
-                return;
-            }
             owo("commands available: !random");
         }
         else if (message.IndexOf("!random") > -1)
         {
-            if (_testing)
-            {
-                echo($"{sender} you have rolled {rng.Next(1, 100)} (1-100)!");
-                return;
-            }
             owo($"{sender} you have rolled {rng.Next(1, 100)} (1-100)!");
         }
-        else if (message.IndexOf("owo") > -1 || message.IndexOf("uwu") > -1)
-            owo(uwuPasta[rng.Next(0, uwuPasta.Count)]);
-        else if (message.IndexOf("hi") > -1)
-            owo(message);
-        else if (message.IndexOf("hey") > -1)
-            owo(message);
-        else if (message.IndexOf("sup") > -1)
-            owo(message);
-        else if (message.IndexOf("hello") > -1)
-            owo(message);
-        else if (message.IndexOf("ty") > -1)
-            owo("np");
-        else if (message.IndexOf("thanks") > -1)
-            owo("no problem");
+        else if (settings.owo)
+        {
+            if (message.IndexOf("owo") > -1 || message.IndexOf("uwu") > -1)
+                owo(uwuPasta[rng.Next(0, uwuPasta.Count)]);
+        }
+        else if (settings.greets)
+        {
+            if (message.IndexOf("hi") > -1)
+                owo(message);
+            else if (message.IndexOf("hey") > -1)
+                owo(message);
+            else if (message.IndexOf("sup") > -1)
+                owo(message);
+            else if (message.IndexOf("hello") > -1)
+                owo(message);
+            else if (message.IndexOf("ty") > -1)
+                owo("np");
+            else if (message.IndexOf("thanks") > -1)
+                owo("no problem");
+        }
         /*
         else if (message.IndexOf("") > -1)
             owo("");
@@ -343,7 +341,10 @@ public static class Utils
             }
             var message = caller.Substring(caller.pooperFind(':') + 2);
             caller = caller.Substring(0, caller.pooperFind(':') - 4).Replace("*DEAD*", "").Trim();
+            if (caller.IndexOf(me) > -1)
+                return;
 
+            // make self check ignore, "status" in console breaks this
             log(2, $"caller id [{caller}] says: {message}");
             chatCommand(caller, message);
         }
@@ -394,8 +395,15 @@ public static class Utils
                     {
                         outputLines[i] = outputLines[i].Substring(indexTwo + 2);
                         outputLines[i] = outputLines[i].Substring(0, outputLines[i].IndexOf(" "));
-                        if (Char.Parse(outputLines[i]) < 100 || Char.Parse(outputLines[i]) > 15)
-                            final += $"-{outputLines[i]} ";
+                        try
+                        {
+                            if (Int32.Parse(outputLines[i]) < 100 || Int32.Parse(outputLines[i]) > 15)
+                                final += $"-{outputLines[i]} ";
+                        }
+                        catch (System.Exception e)
+                        {
+                            log(1, $"{e}");
+                        }
                     }
                 }
             }
@@ -516,7 +524,7 @@ public static class Utils
     /// </summary>
     public static string terribleHash(int length)
     {
-        string characters = "iIl|!o0O";
+        string characters = "iIl1|!o0OS5B8";
         System.Text.StringBuilder result = new System.Text.StringBuilder(length);
         for (int i = 0; i < length; i++)
         {
