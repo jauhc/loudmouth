@@ -20,8 +20,8 @@ public class Settings
 {
     public bool state = true;
     public bool owo = true;
-    public bool kills = true;
-    public bool deaths = true;
+    public bool kills = false;
+    public bool deaths = false;
     public bool greets = true;
 }
 public static class Utils
@@ -234,25 +234,28 @@ public static class Utils
     /// </summary>
     private static void createAliases(string path)
     {
-        run($"setinfo loud_owo_off \"\"");
+        run($"alias loud \"echo 0 LIST {cmdHash}\"");
+        sleep(300);
+
+        run($"setinfo loud_owo_o \"\"");
         run($"alias loud_owo_off \"echo 0 OWO {cmdHash}\"");
-        run($"setinfo loud_owo_on \"\"");
         run($"alias loud_owo_on \"echo 1 OWO {cmdHash}\"");
+        sleep(300);
 
-        run($"setinfo loud_kills_off \"\"");
+        run($"setinfo loud_kills_o \"\"");
         run($"alias loud_kills_off \"echo 0 KILLS {cmdHash}\"");
-        run($"setinfo loud_kills_on \"\"");
         run($"alias loud_kills_on \"echo 1 KILLS {cmdHash}\"");
+        sleep(300);
 
-        run($"setinfo loud_death_off \"\"");
+        run($"setinfo loud_death_o \"\"");
         run($"alias loud_death_off \"echo 0 DETH {cmdHash}\"");
-        run($"setinfo loud_death_on \"\"");
         run($"alias loud_death_on \"echo 1 DETH {cmdHash}\"");
+        sleep(300);
 
-        run($"setinfo loud_greet_off \"\"");
+        run($"setinfo loud_greet_o \"\"");
         run($"alias loud_greet_off \"echo 0 GREET {cmdHash}\"");
-        run($"setinfo loud_greet_on \"\"");
         run($"alias loud_greet_on \"echo 1 GREET {cmdHash}\"");
+        sleep(300);
 
         echo("Commands created!");
     }
@@ -304,6 +307,13 @@ public static class Utils
         bool set = (data[0] == "1") ? true : false;
         switch (data[1])
         {
+            case "LIST":
+                echo($"OWO = " + (settings.owo ? "ON" : "OFF"));
+                echo($"KILLS = " + (settings.kills ? "ON" : "OFF"));
+                echo($"DEATHS = " + (settings.deaths ? "ON" : "OFF"));
+                echo($"GREETS = " + (settings.greets ? "ON" : "OFF"));
+                break;
+
             case "OWO":
                 settings.owo = set;
                 break;
@@ -324,7 +334,8 @@ public static class Utils
                 echo("somehow you broke the settings?");
                 break;
         }
-        echo(set ? $"{data[1]} enabled!" : $"{data[1]} disabled!");
+        if (data[1] != "LIST")
+            echo(set ? $"{data[1]} enabled!" : $"{data[1]} disabled!");
     }
 
     public static string msgCode = "‎ : "; // DONT TOUCH OR WE ALL DIE
@@ -340,7 +351,10 @@ public static class Utils
                     caller = dial[i];
             }
             var message = caller.Substring(caller.pooperFind(':') + 2);
-            caller = caller.Substring(0, caller.pooperFind(':') - 4).Replace("*DEAD*", "").Trim();
+            caller = caller.Substring(0, caller.pooperFind(':') - 4).Trim();
+            caller = caller.Replace("*DEAD*", "");
+            caller = caller.Replace("(Terrorist) ", "");
+            caller = caller.Replace("(Counter-Terrorist) ", "");
             if (caller.IndexOf(me) > -1)
                 return;
 
@@ -378,6 +392,7 @@ public static class Utils
     /// </summary>
     public static void damageDone(string data)
     {
+        return; // broken for now - suggestion: REDO
         int indexOne = data.IndexOf(" - Damage Given\r\n-------------------------"); // 13
         if (indexOne > -1)
         {
