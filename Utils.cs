@@ -23,11 +23,13 @@ public class Settings
     public bool kills = false;
     public bool deaths = false;
     public bool greets = true;
+    public bool clanid = false;
 }
 public static class Utils
 {
     public static PrimS.Telnet.Client client = new PrimS.Telnet.Client("localhost", 2121, new System.Threading.CancellationToken());
     static System.Timers.Timer timer1;
+    static System.Timers.Timer clanTimer;
     public static readonly Random rng = new Random();
     public static readonly string cmdHash = terribleHash(14); // for command verification purposes
     public static bool _testing = false;
@@ -37,6 +39,7 @@ public static class Utils
     public static String me = "0";
     public static CSGSI.Nodes.PlayerNode myNode;
     // could check gs.Provider.SteamID
+    public static string myname = "";
     public static CSGSI.GameState gameState = new CSGSI.GameState("");
     public static List<CSGSI.Nodes.PlayerNode> players = new List<CSGSI.Nodes.PlayerNode>();
     public static List<string> teamMates = new List<string>();
@@ -86,9 +89,23 @@ public static class Utils
 
     static void InitTimer()
     {
+        // timer1 is for speaking
         timer1 = new System.Timers.Timer(800);
         timer1.Elapsed += speakBuffer;
         timer1.Enabled = false;
+
+        // clanTimer is for clanid spam
+        clanTimer = new System.Timers.Timer(600);
+        clanTimer.Elapsed += clanSpam;
+        clanTimer.Enabled = false;
+    }
+
+    private static int clanIdx = 0;
+    public static void clanSpam(Object source = null, ElapsedEventArgs e = null)
+    {
+        if (clanIdx >= clanList.Count)
+            clanIdx = 0;
+        run($"cl_clanid {clanList[clanIdx++]}");
     }
 
     static Queue<string> thingsToSay = new Queue<string>();
@@ -229,11 +246,15 @@ public static class Utils
         pastaCooked = true;
     }
 
+    static List<int> clanList = new List<int>();
     /// <summary>
     /// creates aliases for controls
     /// </summary>
     private static void createAliases(string path)
     {
+        // vvoooo groups 1-10
+        clanList.AddRange(new[] { 7670261, 7670266, 7670268, 7670273, 7670276, 7670621, 7670634, 7670641, 7670647 });
+
         run($"alias loud \"echo 0 LIST {cmdHash}\"");
         sleep(300);
 
@@ -257,6 +278,10 @@ public static class Utils
         run($"alias loud_greet_on \"echo 1 GREET {cmdHash}\"");
         sleep(300);
 
+        run($"setinfo loud_clan_o \"\"");
+        run($"alias loud_clan_off \"echo 0 CLAN {cmdHash}\"");
+        run($"alias loud_clan_on \"echo 1 CLAN {cmdHash}\"");
+        sleep(300);
         echo("Commands created!");
     }
 
@@ -265,6 +290,10 @@ public static class Utils
     /// </summary>
     private static void chatCommand(string sender, string message)
     {
+        // if (sender.IndexOf(myname) > -1) return;
+        message = message.ToLower();
+        // log("command triggered");
+        // issue: sometimes doesnt reply at all?
         if (message.IndexOf("!help") > -1)
         {
             owo("commands available: !random");
@@ -312,10 +341,16 @@ public static class Utils
                 echo($"KILLS = " + (settings.kills ? "ON" : "OFF"));
                 echo($"DEATHS = " + (settings.deaths ? "ON" : "OFF"));
                 echo($"GREETS = " + (settings.greets ? "ON" : "OFF"));
+                echo($"CLANS = " + (settings.clanid ? "ON" : "OFF"));
                 break;
 
             case "OWO":
                 settings.owo = set;
+                break;
+
+            case "CLAN":
+                settings.clanid = set;
+                clanTimer.Enabled = set;
                 break;
 
             case "KILLS":
@@ -463,6 +498,7 @@ public static class Utils
         } // probably bad
         if (client.IsConnected) echo("RCON Connected!");
         me = getMyCommunityID();
+        myname = gameState.Player.Name;
         InitTimer();
         cookPasta();
         createAliases(cfg);
