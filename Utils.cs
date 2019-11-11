@@ -19,10 +19,10 @@ Purpose of file:
 public class Settings
 {
     public bool state = true;
-    public bool owo = true;
+    public bool owo = false;
     public bool kills = false;
     public bool deaths = false;
-    public bool greets = true;
+    public bool greets = false;
     public bool clanid = false;
     public bool clanfx = false;
 }
@@ -132,7 +132,7 @@ public static class Utils
         }
         else
         {
-            run($"say {thingsToSay.Dequeue()}");
+            run($"{thingsToSay.Dequeue()}");
         }
         if (thingsToSay.Count > 0) { speechTimer.Start(); speechTimer.Enabled = true; }
         if (thingsToSay.Count == 0) { speechTimer.Stop(); speechTimer.Enabled = true; }
@@ -305,39 +305,42 @@ public static class Utils
     /// <summary>
     /// list of chat commands bla bla
     /// </summary>
-    private static void chatCommand(string sender, string message)
+    private static void chatCommand(string sender, string message, bool teamChat = false)
     {
+        string sayCmd = "say ";
+        if (teamChat) sayCmd = "say_team ";
+        if (sender == myname) sleep(900);
         // if (sender.IndexOf(myname) > -1) return;
         message = message.ToLower();
         // log("command triggered");
         // issue: sometimes doesnt reply at all?
         if (message.IndexOf("!help") > -1)
         {
-            owo("commands available: !random");
+            echo("!commands available: !random, owo");
         }
         else if (message.IndexOf("!random") > -1)
         {
-            owo($"{sender} you have rolled {rng.Next(1, 100)} (1-100)!");
+            owo($"{sayCmd}{sender} you have rolled {rng.Next(1, 100)} (1-100)!");
         }
         else if (settings.owo)
         {
             if (message.IndexOf("owo") > -1 || message.IndexOf("uwu") > -1)
-                owo(uwuPasta[rng.Next(0, uwuPasta.Count)]);
+                owo(sayCmd + uwuPasta[rng.Next(0, uwuPasta.Count)]);
         }
         else if (settings.greets)
         {
             if (message.IndexOf("hi") > -1)
-                owo(message);
+                owo(sayCmd + message);
             else if (message.IndexOf("hey") > -1)
-                owo(message);
+                owo(sayCmd + message);
             else if (message.IndexOf("sup") > -1)
-                owo(message);
+                owo(sayCmd + message);
             else if (message.IndexOf("hello") > -1)
-                owo(message);
+                owo(sayCmd + message);
             else if (message.IndexOf("ty") > -1)
-                owo("np");
+                owo(sayCmd + "np");
             else if (message.IndexOf("thanks") > -1)
-                owo("no problem");
+                owo(sayCmd + "no problem");
         }
         /*
         else if (message.IndexOf("") > -1)
@@ -400,6 +403,7 @@ public static class Utils
     public static string uniqueCode = "‎"; // DONT TOUCH OR WE ALL DIE
     public static void chatParser(string data)
     {
+        bool teamSay = false;
         if (data.IndexOf(msgCode) > -1)
         {
             var caller = data.Trim();
@@ -412,16 +416,17 @@ public static class Utils
             // should just redo entirely using the LEFT-TO-RIGHT symbol as a landmark
             var message = caller.Substring(caller.pooperFind(':') + 2).Trim();
             caller = caller.Substring(0, caller.pooperFind(':') - 4).Trim();
+            if (caller.IndexOf("(Terrorist)") > -1 || caller.IndexOf("(Counter-Terrorist)") > -1) teamSay = true;
             caller = caller.Replace("*DEAD*", "");
-            caller = caller.Replace("(Terrorist)", "");
-            caller = caller.Replace("(Counter-Terrorist)", "");
+            caller = caller.Replace("(Terrorist) ", "");
+            caller = caller.Replace("(Counter-Terrorist) ", "");
             if (caller.IndexOf(uniqueCode) > -1) caller = caller.Substring(0, caller.IndexOf(uniqueCode)+1);
             if (caller.IndexOf(me) > -1)
                 return;
 
             // make self check ignore, "status" in console breaks this
             log(2, $"caller id [{caller}] says: {message}");
-            chatCommand(caller, message);
+            chatCommand(caller, message, teamSay);
         }
     }
 
@@ -524,7 +529,6 @@ public static class Utils
         } // probably bad
         if (client.IsConnected) echo("RCON Connected!");
         me = getMyCommunityID();
-        myname = gameState.Player.Name;
         InitTimer();
         cookPasta();
         createAliases(cfg);

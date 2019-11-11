@@ -79,6 +79,7 @@ namespace loudmouth
         static void OnNewGameState(GameState gs)
         {
             if (gs.Player.HasData)
+            if (Utils.myname.Length == 0) Utils.myname = gs.Player.Name;
                 if (Utils.bGameActive(gs) && isLocalPlayer(gs))
                 {
                     // share gamestate
