@@ -24,11 +24,12 @@ public class Settings
     public bool deaths = false;
     public bool greets = true;
     public bool clanid = false;
+    public bool clanfx = false;
 }
 public static class Utils
 {
     public static PrimS.Telnet.Client client = new PrimS.Telnet.Client("localhost", 2121, new System.Threading.CancellationToken());
-    static System.Timers.Timer timer1;
+    static System.Timers.Timer speechTimer;
     static System.Timers.Timer clanTimer;
     public static readonly Random rng = new Random();
     public static readonly string cmdHash = terribleHash(14); // for command verification purposes
@@ -89,23 +90,34 @@ public static class Utils
 
     static void InitTimer()
     {
-        // timer1 is for speaking
-        timer1 = new System.Timers.Timer(800);
-        timer1.Elapsed += speakBuffer;
-        timer1.Enabled = false;
+        // speechTimer is for speaking
+        speechTimer = new System.Timers.Timer(800);
+        speechTimer.Elapsed += speakBuffer;
+        speechTimer.Enabled = false;
 
         // clanTimer is for clanid spam
-        clanTimer = new System.Timers.Timer(600);
+        clanTimer = new System.Timers.Timer(300);
         clanTimer.Elapsed += clanSpam;
         clanTimer.Enabled = false;
     }
 
     private static int clanIdx = 0;
+    private static bool clanState = true;
     public static void clanSpam(Object source = null, ElapsedEventArgs e = null)
     {
-        if (clanIdx >= clanList.Count)
-            clanIdx = 0;
-        run($"cl_clanid {clanList[clanIdx++]}");
+        if (!settings.clanfx)
+        {
+            if (clanIdx >= clanList.Count)
+                clanIdx = 0;
+            run($"cl_clanid {clanList[clanIdx++]}");
+        }
+        else if (settings.clanfx)
+        {
+            if (clanIdx == 0) clanState = true;
+            else if (clanIdx + 1 >= clanList.Count) clanState = false;
+            if (clanState) run($"cl_clanid {clanList[clanIdx++]}");
+            else if (!clanState) run($"cl_clanid {clanList[clanIdx--]}");
+        }
     }
 
     static Queue<string> thingsToSay = new Queue<string>();
@@ -122,8 +134,8 @@ public static class Utils
         {
             run($"say {thingsToSay.Dequeue()}");
         }
-        if (thingsToSay.Count > 0) { timer1.Start(); timer1.Enabled = true; }
-        if (thingsToSay.Count == 0) { timer1.Stop(); timer1.Enabled = true; }
+        if (thingsToSay.Count > 0) { speechTimer.Start(); speechTimer.Enabled = true; }
+        if (thingsToSay.Count == 0) { speechTimer.Stop(); speechTimer.Enabled = true; }
     }
 
     /// <summary>
@@ -282,6 +294,11 @@ public static class Utils
         run($"alias loud_clan_off \"echo 0 CLAN {cmdHash}\"");
         run($"alias loud_clan_on \"echo 1 CLAN {cmdHash}\"");
         sleep(300);
+
+        run($"setinfo loud_clan_wave_o \"\"");
+        run($"alias loud_clan_wave_off \"echo 0 CLANFX {cmdHash}\"");
+        run($"alias loud_clan_wave_on \"echo 1 CLANFX {cmdHash}\"");
+        sleep(300);
         echo("Commands created!");
     }
 
@@ -342,6 +359,7 @@ public static class Utils
                 echo($"DEATHS = " + (settings.deaths ? "ON" : "OFF"));
                 echo($"GREETS = " + (settings.greets ? "ON" : "OFF"));
                 echo($"CLANS = " + (settings.clanid ? "ON" : "OFF"));
+                echo($"CLANFX = " + (settings.clanid ? "ON" : "OFF"));
                 break;
 
             case "OWO":
@@ -351,6 +369,11 @@ public static class Utils
             case "CLAN":
                 settings.clanid = set;
                 clanTimer.Enabled = set;
+                run("cl_clanid 0");
+                break;
+
+            case "CLANFX":
+                settings.clanfx = set;
                 break;
 
             case "KILLS":
@@ -374,6 +397,7 @@ public static class Utils
     }
 
     public static string msgCode = "‎ : "; // DONT TOUCH OR WE ALL DIE
+    public static string uniqueCode = "‎"; // DONT TOUCH OR WE ALL DIE
     public static void chatParser(string data)
     {
         if (data.IndexOf(msgCode) > -1)
@@ -385,11 +409,13 @@ public static class Utils
                 if (dial[i].IndexOf(msgCode) > -1)
                     caller = dial[i];
             }
-            var message = caller.Substring(caller.pooperFind(':') + 2);
+            // should just redo entirely using the LEFT-TO-RIGHT symbol as a landmark
+            var message = caller.Substring(caller.pooperFind(':') + 2).Trim();
             caller = caller.Substring(0, caller.pooperFind(':') - 4).Trim();
             caller = caller.Replace("*DEAD*", "");
-            caller = caller.Replace("(Terrorist) ", "");
-            caller = caller.Replace("(Counter-Terrorist) ", "");
+            caller = caller.Replace("(Terrorist)", "");
+            caller = caller.Replace("(Counter-Terrorist)", "");
+            if (caller.IndexOf(uniqueCode) > -1) caller = caller.Substring(0, caller.IndexOf(uniqueCode)+1);
             if (caller.IndexOf(me) > -1)
                 return;
 
@@ -530,9 +556,9 @@ public static class Utils
     public static void owo(String what)
     {
         thingsToSay.Enqueue(what);
-        if (!timer1.Enabled)
+        if (!speechTimer.Enabled)
         {
-            timer1.Start();
+            speechTimer.Start();
             speakBuffer();
         }
     }
