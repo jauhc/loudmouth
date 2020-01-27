@@ -10,6 +10,8 @@ using System.Timers;
 This file contains most simple code;
 ganestate intergration triggers and such
 ----------
+
+    REDO ENTIRE THIS PASSING BY REFERENCE INSTEAD OF COPY FUCK SAKE
 */
 
 namespace loudmouth
@@ -22,14 +24,21 @@ namespace loudmouth
         static int playerKills = -64;
         static int roundHS = -64;
         static int myDeaths = -1;
+        // new variable to store last shooting weapon?
 
         /// <summary>
         /// Insert point, launch paramters; dev = log to console only, s = simple mode
         /// </summary>
         static void Main(string[] args)
         {
+            int port = 1338;
+            // Parse args
             for (int i = 0; i < args.Length; i++)
-            {
+            {   // oh god please there has to be a better way of doing this
+                // if (args[i].ToLower.IndexOf("gameport") > -1)
+                    // Utils.gamePort = int.Parse(args[i].Substring(9));
+                // if (args[i].ToLower.IndexOf("netport") > -1)
+                    // Utils.netPort = int.Parse(args[i].Substring(8));
                 if (args[i] == "dev")
                     Utils._testing = true;
                 if (args[i] == "s")
@@ -44,7 +53,7 @@ namespace loudmouth
                 Environment.Exit(1);
             }
             Utils.Init();
-            gsl = new GameStateListener(1338);
+            gsl = new GameStateListener(port);
             if (!gsl.Start()) Environment.Exit(0);
             gsl.NewGameState += OnNewGameState;
             gsl.RoundPhaseChanged += Utils.readMates;
@@ -56,7 +65,7 @@ namespace loudmouth
             else if (Utils._puntualMode) Utils.log("punctual mode on");
         }
 
-        static bool isLocalPlayer(GameState gs)
+        static bool isLocalPlayer(ref GameState gs)
         {
             return gs.Player.SteamID.ToString() == Utils.me;
         }
@@ -80,7 +89,7 @@ namespace loudmouth
         {
             if (gs.Player.HasData)
             if (Utils.myname.Length == 0) Utils.myname = gs.Player.Name;
-                if (Utils.bGameActive(gs) && isLocalPlayer(gs))
+                if (Utils.bGameActive(ref gs) && isLocalPlayer(ref gs))
                 {
                     // share gamestate
                     Utils.gameState = gs;
@@ -131,7 +140,7 @@ namespace loudmouth
                                 if (Utils._singlesMode)
                                     Utils.owo("+" + Environment.NewLine + "enemydown");
                                 else if (!Utils._singlesMode && !Utils._puntualMode)
-                                    onKill(gs);
+                                    onKill(ref gs);
                             }
                     }
                     playerKills = curkills;
@@ -148,7 +157,7 @@ namespace loudmouth
                             if (Utils._singlesMode)
                                 Utils.owo("-");
                             else if (!Utils._singlesMode && !Utils._puntualMode)
-                                onDeath(gs);
+                                onDeath(ref gs);
                         }
                     myDeaths = curDeaths;
                 }
@@ -158,7 +167,7 @@ namespace loudmouth
         /// <summary>
         /// We got a kill! Time to tell entire server about it!
         /// </summary>
-        static void onKill(GameState gs)
+        static void onKill(ref GameState gs)
         {
             var cheese = new List<string>();
             if (gs.Player.State.Smoked > 32)
@@ -177,7 +186,7 @@ namespace loudmouth
                 "LOL i was blind",
                 "owned while flashed lmao",
                 "ez blind kills",
-                "sit down whoever you are because im BLIND"
+                "sit down whoever you are because im FLASHED"
                 });
             }
             else
@@ -211,13 +220,13 @@ namespace loudmouth
                     };
                 dad += postfix[Utils.rng.Next(postfix.Count)];
             }
-            Utils.owo(dad + Environment.NewLine + "enemydown");
+            Utils.owo("say " + dad + Environment.NewLine + "enemydown");
         }
 
         /// <summary>
         /// You died and its not your fault
         /// </summary>
-        static void onDeath(GameState gs)
+        static void onDeath(ref GameState gs)
         {
             // todo add dmg done
             var cheese = new List<string>();
@@ -244,8 +253,8 @@ namespace loudmouth
                 "omg 64 tick"
                     });
             }
-            String dad = cheese[Utils.rng.Next(cheese.Count)];
-            Utils.owo(dad);
+            string dad = cheese[Utils.rng.Next(cheese.Count)];
+            Utils.owo("say " + dad);
         }
 
     }

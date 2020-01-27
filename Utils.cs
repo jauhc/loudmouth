@@ -28,15 +28,15 @@ public class Settings
 }
 public static class Utils
 {
-    public static PrimS.Telnet.Client client = new PrimS.Telnet.Client("localhost", 2121, new System.Threading.CancellationToken());
-    static System.Timers.Timer speechTimer;
-    static System.Timers.Timer clanTimer;
+    static System.Timers.Timer speechTimer, clanTimer;
     public static readonly Random rng = new Random();
     public static readonly string cmdHash = terribleHash(14); // for command verification purposes
     public static bool _testing = false;
     public static bool _singlesMode = false;
     public static bool _puntualMode = false;
     public static bool pastaCooked = false;
+    public static int gamePort = 1338;
+    public static int netPort = 2121;
     public static String me = "0";
     public static CSGSI.Nodes.PlayerNode myNode;
     // could check gs.Provider.SteamID
@@ -45,6 +45,7 @@ public static class Utils
     public static List<CSGSI.Nodes.PlayerNode> players = new List<CSGSI.Nodes.PlayerNode>();
     public static List<string> teamMates = new List<string>();
     public static Settings settings = new Settings();
+    public static PrimS.Telnet.Client client;
 
     /// <summary>
     /// A fancy log method, 0 = INFO, 1 = ERROR, 2 = WARN
@@ -82,13 +83,15 @@ public static class Utils
     /// <summary>
     /// Dumb wrapper for sleep method
     /// </summary>
-    public static void sleep(int ms)
+    public static void sleep(int ms, int noise = 0)
     {
+        if (noise > 0)
+            ms += rng.Next(1, noise);
         if (ms > 0)
             System.Threading.Thread.Sleep(ms);
     }
 
-    static void InitTimer()
+    static void initTimer()
     {
         // speechTimer is for speaking
         speechTimer = new System.Timers.Timer(800);
@@ -143,7 +146,7 @@ public static class Utils
     /// </summary>
     static string readConfig()
     {
-        string blob = "\"loudmouth\"\n{\n\t\"uri\" \"http://localhost:1338\"\n\t\"timeout\" \"5.0\"\n\t\"buffer\"  \"0.05\"\n\t\"throttle\" \"0.1\"\n\t\"heartbeat\" \"3.0\"\n\t\"data\"\n\t{\n\t\t\"provider\"\t\t\t\t\t\"1\"\n\t\t\"map\"\t\t\t\t\t\t\"1\"\n\t\t\"round\"\t\t\t\t\t\t\"1\"\n\t\t\"player_id\"\t\t\t\t\t\"1\"\n\t\t\"player_weapons\"\t\t\t\"1\"\n\t\t\"player_match_stats\"\t\t\"1\"\n\t\t\"player_state\"\t\t\t\t\"1\"\n\t\t\"allplayers_id\"\t\t\t\t\"1\"\n\t\t\"allplayers_state\"\t\t\t\"1\"\n\t\t\"allplayers_match_stats\"\t\"1\"\n\t}\n}";
+        string blob = "\"loudmouth\"\n{\n\t\"uri\" \"http://localhost:" + gamePort + "\"\n\t\"timeout\" \"5.0\"\n\t\"buffer\"  \"0.05\"\n\t\"throttle\" \"0.1\"\n\t\"heartbeat\" \"3.0\"\n\t\"data\"\n\t{\n\t\t\"provider\"\t\t\t\t\t\"1\"\n\t\t\"map\"\t\t\t\t\t\t\"1\"\n\t\t\"round\"\t\t\t\t\t\t\"1\"\n\t\t\"player_id\"\t\t\t\t\t\"1\"\n\t\t\"player_weapons\"\t\t\t\"1\"\n\t\t\"player_match_stats\"\t\t\"1\"\n\t\t\"player_state\"\t\t\t\t\"1\"\n\t\t\"allplayers_id\"\t\t\t\t\"1\"\n\t\t\"allplayers_state\"\t\t\t\"1\"\n\t\t\"allplayers_match_stats\"\t\"1\"\n\t}\n}";
         var steamRegv = Microsoft.Win32.Registry.GetValue("HKEY_CURRENT_USER\\Software\\Valve\\Steam\\", "SteamPath", 0);
         string libraryFile = System.IO.File.ReadAllText($"{steamRegv}\\steamapps\\libraryfolders.vdf").Trim();
         string configFile = "";
@@ -159,7 +162,7 @@ public static class Utils
                     string cfgFolder = $"{path}\\steamapps\\common\\Counter-Strike Global Offensive\\csgo\\cfg";
                     // sort of sanity check if config.cfg is present to make sure its the correct dir
                     configFile = $"{cfgFolder}\\gamestate_integration_loudmouth.cfg";
-                    log(2, $"{cfgFolder}\\config.cfg");
+                    if (_testing) log($"{cfgFolder}\\config.cfg");
                     if (System.IO.File.Exists($"{cfgFolder}\\settings_default.scr"))
                     {
                         if (!System.IO.File.Exists(configFile))
@@ -262,43 +265,44 @@ public static class Utils
     /// <summary>
     /// creates aliases for controls
     /// </summary>
-    private static void createAliases(string path)
+    private static void createAliases()
     {
         // vvoooo groups 1-10
         clanList.AddRange(new[] { 7670261, 7670266, 7670268, 7670273, 7670276, 7670621, 7670634, 7670641, 7670647 });
 
         run($"alias loud \"echo 0 LIST {cmdHash}\"");
-        sleep(300);
+        sleep(50);
 
         run($"setinfo loud_owo_o \"\"");
         run($"alias loud_owo_off \"echo 0 OWO {cmdHash}\"");
         run($"alias loud_owo_on \"echo 1 OWO {cmdHash}\"");
-        sleep(300);
+        sleep(51);
 
         run($"setinfo loud_kills_o \"\"");
         run($"alias loud_kills_off \"echo 0 KILLS {cmdHash}\"");
         run($"alias loud_kills_on \"echo 1 KILLS {cmdHash}\"");
-        sleep(300);
+        sleep(51);
 
         run($"setinfo loud_death_o \"\"");
         run($"alias loud_death_off \"echo 0 DETH {cmdHash}\"");
         run($"alias loud_death_on \"echo 1 DETH {cmdHash}\"");
-        sleep(300);
+        sleep(51);
 
         run($"setinfo loud_greet_o \"\"");
         run($"alias loud_greet_off \"echo 0 GREET {cmdHash}\"");
         run($"alias loud_greet_on \"echo 1 GREET {cmdHash}\"");
-        sleep(300);
+        sleep(51);
 
         run($"setinfo loud_clan_o \"\"");
         run($"alias loud_clan_off \"echo 0 CLAN {cmdHash}\"");
         run($"alias loud_clan_on \"echo 1 CLAN {cmdHash}\"");
-        sleep(300);
+        sleep(51);
 
         run($"setinfo loud_clan_wave_o \"\"");
         run($"alias loud_clan_wave_off \"echo 0 CLANFX {cmdHash}\"");
         run($"alias loud_clan_wave_on \"echo 1 CLANFX {cmdHash}\"");
-        sleep(300);
+        sleep(51);
+
         echo("Commands created!");
     }
 
@@ -309,7 +313,7 @@ public static class Utils
     {
         string sayCmd = "say ";
         if (teamChat) sayCmd = "say_team ";
-        if (sender == myname) sleep(900);
+        if (sender.Trim() == myname.Trim()) sleep(1200);
         // if (sender.IndexOf(myname) > -1) return;
         message = message.ToLower();
         // log("command triggered");
@@ -356,6 +360,7 @@ public static class Utils
         bool set = (data[0] == "1") ? true : false;
         switch (data[1])
         {
+
             case "LIST":
                 echo($"OWO = " + (settings.owo ? "ON" : "OFF"));
                 echo($"KILLS = " + (settings.kills ? "ON" : "OFF"));
@@ -401,7 +406,7 @@ public static class Utils
 
     public static string msgCode = "‎ : "; // DONT TOUCH OR WE ALL DIE
     public static string uniqueCode = "‎"; // DONT TOUCH OR WE ALL DIE
-    public static void chatParser(string data)
+    public static void chatParser(ref string data)
     {
         bool teamSay = false;
         if (data.IndexOf(msgCode) > -1)
@@ -420,9 +425,10 @@ public static class Utils
             caller = caller.Replace("*DEAD*", "");
             caller = caller.Replace("(Terrorist) ", "");
             caller = caller.Replace("(Counter-Terrorist) ", "");
-            if (caller.IndexOf(uniqueCode) > -1) caller = caller.Substring(0, caller.IndexOf(uniqueCode)+1);
+            if (caller.IndexOf(uniqueCode) > 0) caller = caller.Substring(0, caller.IndexOf(uniqueCode)+1);
             if (caller.IndexOf(me) > -1)
                 return;
+            // this shit only returns first character of persons name
 
             // make self check ignore, "status" in console breaks this
             log(2, $"caller id [{caller}] says: {message}");
@@ -443,8 +449,8 @@ public static class Utils
             {
                 Console.Write(rawOutput);
                 // add check here for IF WE WANT TO TELL DMG DONE
-                damageDone(rawOutput);
-                chatParser(rawOutput);
+                damageDone(ref rawOutput);
+                chatParser(ref rawOutput);
 
                 int hashIdx = rawOutput.IndexOf(cmdHash);
                 if (hashIdx > -1)
@@ -456,7 +462,7 @@ public static class Utils
     /// <summary>
     /// parses damage done
     /// </summary>
-    public static void damageDone(string data)
+    public static void damageDone(ref string data)
     {
         return; // broken for now - suggestion: REDO
         int indexOne = data.IndexOf(" - Damage Given\r\n-------------------------"); // 13
@@ -496,7 +502,7 @@ public static class Utils
     /// <summary>
     /// Returns if the game is live
     /// </summary>
-    public static bool bGameActive(CSGSI.GameState gs)
+    public static bool bGameActive(ref CSGSI.GameState gs)
     {
         try
         {
@@ -521,17 +527,32 @@ public static class Utils
         //Console.SetBufferSize(56, 15);
         Console.ForegroundColor = ConsoleColor.White;
         string cfg = readConfig();
-        if (cfg == "") Environment.Exit(1);
-        while (!client.IsConnected)
+        if (cfg == "") 
         {
-            log(2, "Awaiting RCON connection...");
-            sleep(2000);
-        } // probably bad
+            log(2, $"Could not find configuration");
+            Environment.Exit(1);
+        }
+        // add a timeout reconnect try catch or whatever
+        bool connected = false;
+        while (!connected)
+        {
+            try 
+	        {
+                client = new PrimS.Telnet.Client("localhost", netPort, new System.Threading.CancellationToken()); // blocking
+                connected = true;
+                break;
+	        }
+	        catch (Exception)
+	        {
+		        log(1, "Could not connect to remote console... retrying...");
+	        }
+        }
+        
         if (client.IsConnected) echo("RCON Connected!");
         me = getMyCommunityID();
-        InitTimer();
+        initTimer();
         cookPasta();
-        createAliases(cfg);
+        createAliases();
         Thread logger = new Thread((new ThreadStart(rconParser)));
         logger.Start();
         /* 
@@ -557,7 +578,7 @@ public static class Utils
     /// <summary>
     /// Method that is called when string is generated and must be said
     /// </summary>
-    public static void owo(String what)
+    public static void owo(string what)
     {
         thingsToSay.Enqueue(what);
         if (!speechTimer.Enabled)
