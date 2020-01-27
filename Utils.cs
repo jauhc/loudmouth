@@ -322,6 +322,11 @@ public static class Utils
         {
             echo("!commands available: !random, owo");
         }
+        else if (message.IndexOf("!gg") > -1 
+        || message.IndexOf("!rs") > -1)
+        {
+            owo($"unknown command, see commands available with !help");
+        }
         else if (message.IndexOf("!random") > -1)
         {
             owo($"{sayCmd}{sender} you have rolled {rng.Next(1, 100)} (1-100)!");
