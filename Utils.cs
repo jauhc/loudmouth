@@ -11,8 +11,8 @@ Purpose of file:
 */
 /*
     todo:
-        ACTUAL CONTROLS FOR OPTIONS??
-        !commands
+        persistent settings? could be stored as .cfg in game folder
+        ACTUAL CONTROLS FOR OPTIONS?? <-- what was i thinking
         !req <youtube url>
 
 */
@@ -283,6 +283,11 @@ public static class Utils
         run($"setinfo loud_kills_o \"\"");
         run($"alias loud_kills_off \"echo 0 KILLS {cmdHash}\"");
         run($"alias loud_kills_on \"echo 1 KILLS {cmdHash}\"");
+        sleep(51);
+
+        run($"setinfo loud_killradio_o \"\"");
+        run($"alias loud_killradio_off \"echo 0 KILLSRADIO {cmdHash}\"");
+        run($"alias loud_killradio_on \"echo 1 KILLSRADIO {cmdHash}\"");
         sleep(51);
 
         run($"setinfo loud_death_o \"\"");
@@ -629,6 +634,7 @@ public static class Utils
 
     /// <summary>
     /// (obsolete) making a multiline string printable etc
+    /// saving for future use in chat commands
     /// </summary>
     public static string makePrintable(this string s)
     {
