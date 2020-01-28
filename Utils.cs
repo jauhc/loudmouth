@@ -46,7 +46,7 @@ public static class Utils
     public static List<CSGSI.Nodes.PlayerNode> players = new List<CSGSI.Nodes.PlayerNode>();
     public static List<string> teamMates = new List<string>();
     public static Settings settings = new Settings();
-    public static PrimS.Telnet.Client client;
+    public static RemCon.RCon RCON;
 
     /// <summary>
     /// A fancy log method, 0 = INFO, 1 = ERROR, 2 = WARN
@@ -78,8 +78,6 @@ public static class Utils
     {
         log(0, data);
     }
-    public static Action<string> echo = s => client.WriteLine($"echo [Loudmouth] - {s}\n");
-    public static Action<string> run = s => client.WriteLine($"{s}\n");
 
     /// <summary>
     /// Dumb wrapper for sleep method
@@ -113,14 +111,14 @@ public static class Utils
         {
             if (clanIdx >= clanList.Count)
                 clanIdx = 0;
-            run($"cl_clanid {clanList[clanIdx++]}");
+            RCON.Run($"cl_clanid {clanList[clanIdx++]}");
         }
         else if (settings.clanfx)
         {
             if (clanIdx == 0) clanState = true;
             else if (clanIdx + 1 >= clanList.Count) clanState = false;
-            if (clanState) run($"cl_clanid {clanList[clanIdx++]}");
-            else if (!clanState) run($"cl_clanid {clanList[clanIdx--]}");
+            if (clanState) RCON.Run($"cl_clanid {clanList[clanIdx++]}");
+            else if (!clanState) RCON.Run($"cl_clanid {clanList[clanIdx--]}");
         }
     }
 
@@ -132,11 +130,11 @@ public static class Utils
     {
         if (_testing)
         {
-            echo($"{thingsToSay.Dequeue()}");
+            RCON.Echo($"{thingsToSay.Dequeue()}");
         }
         else
         {
-            run($"{thingsToSay.Dequeue()}");
+            RCON.Run($"{thingsToSay.Dequeue()}");
         }
         if (thingsToSay.Count > 0) { speechTimer.Start(); speechTimer.Enabled = true; }
         if (thingsToSay.Count == 0) { speechTimer.Stop(); speechTimer.Enabled = true; }
@@ -273,45 +271,49 @@ public static class Utils
         clanList.AddRange(new[] { 7670261, 7670266, 7670268, 7670273, 7670276, 7670621, 7670634, 7670641, 7670647 });
 
         // TODO make toggles instead?
+<<<<<<< HEAD
         run($"alias loud \"echo 0 LIST {cmdHash}\"");
+=======
+        RCON.Run($"alias loud \"RCON.Echo 0 LIST {cmdHash}\"");
+>>>>>>> 556389f1bdbbd79aa5b18a09b508b39af52fe8e9
         sleep(50);
 
-        run($"setinfo loud_owo_o \"\"");
-        run($"alias loud_owo_off \"echo 0 OWO {cmdHash}\"");
-        run($"alias loud_owo_on \"echo 1 OWO {cmdHash}\"");
+        RCON.Run($"setinfo loud_owo_o \"\"");
+        RCON.Run($"alias loud_owo_off \"RCON.Echo 0 OWO {cmdHash}\"");
+        RCON.Run($"alias loud_owo_on \"RCON.Echo 1 OWO {cmdHash}\"");
         sleep(51);
 
-        run($"setinfo loud_kills_o \"\"");
-        run($"alias loud_kills_off \"echo 0 KILLS {cmdHash}\"");
-        run($"alias loud_kills_on \"echo 1 KILLS {cmdHash}\"");
+        RCON.Run($"setinfo loud_kills_o \"\"");
+        RCON.Run($"alias loud_kills_off \"RCON.Echo 0 KILLS {cmdHash}\"");
+        RCON.Run($"alias loud_kills_on \"RCON.Echo 1 KILLS {cmdHash}\"");
         sleep(51);
 
-        run($"setinfo loud_killradio_o \"\"");
-        run($"alias loud_killradio_off \"echo 0 KILLSRADIO {cmdHash}\"");
-        run($"alias loud_killradio_on \"echo 1 KILLSRADIO {cmdHash}\"");
+        RCON.Run($"setinfo loud_killradio_o \"\"");
+        RCON.Run($"alias loud_killradio_off \"RCON.Echo 0 KILLSRADIO {cmdHash}\"");
+        RCON.Run($"alias loud_killradio_on \"RCON.Echo 1 KILLSRADIO {cmdHash}\"");
         sleep(51);
 
-        run($"setinfo loud_death_o \"\"");
-        run($"alias loud_death_off \"echo 0 DETH {cmdHash}\"");
-        run($"alias loud_death_on \"echo 1 DETH {cmdHash}\"");
+        RCON.Run($"setinfo loud_death_o \"\"");
+        RCON.Run($"alias loud_death_off \"RCON.Echo 0 DETH {cmdHash}\"");
+        RCON.Run($"alias loud_death_on \"RCON.Echo 1 DETH {cmdHash}\"");
         sleep(51);
 
-        run($"setinfo loud_greet_o \"\"");
-        run($"alias loud_greet_off \"echo 0 GREET {cmdHash}\"");
-        run($"alias loud_greet_on \"echo 1 GREET {cmdHash}\"");
+        RCON.Run($"setinfo loud_greet_o \"\"");
+        RCON.Run($"alias loud_greet_off \"RCON.Echo 0 GREET {cmdHash}\"");
+        RCON.Run($"alias loud_greet_on \"RCON.Echo 1 GREET {cmdHash}\"");
         sleep(51);
 
-        run($"setinfo loud_clan_o \"\"");
-        run($"alias loud_clan_off \"echo 0 CLAN {cmdHash}\"");
-        run($"alias loud_clan_on \"echo 1 CLAN {cmdHash}\"");
+        RCON.Run($"setinfo loud_clan_o \"\"");
+        RCON.Run($"alias loud_clan_off \"RCON.Echo 0 CLAN {cmdHash}\"");
+        RCON.Run($"alias loud_clan_on \"RCON.Echo 1 CLAN {cmdHash}\"");
         sleep(51);
 
-        run($"setinfo loud_clan_wave_o \"\"");
-        run($"alias loud_clan_wave_off \"echo 0 CLANFX {cmdHash}\"");
-        run($"alias loud_clan_wave_on \"echo 1 CLANFX {cmdHash}\"");
+        RCON.Run($"setinfo loud_clan_wave_o \"\"");
+        RCON.Run($"alias loud_clan_wave_off \"RCON.Echo 0 CLANFX {cmdHash}\"");
+        RCON.Run($"alias loud_clan_wave_on \"RCON.Echo 1 CLANFX {cmdHash}\"");
         sleep(51);
 
-        echo("Commands created!");
+        RCON.Echo("Commands created!");
     }
 
     /// <summary>
@@ -328,7 +330,7 @@ public static class Utils
         // issue: sometimes doesnt reply at all?
         if (message.IndexOf("!help") > -1)
         {
-            echo("!commands available: !random, owo");
+            RCON.Echo("!commands available: !random, owo");
         }
         else if (message.IndexOf("!gg") > -1
         || message.IndexOf("!rs") > -1)
@@ -376,13 +378,13 @@ public static class Utils
         {
             // TODO prettify this pls? \t stuff?
             case "LIST":
-                echo($"OWO = " + (settings.owo ? "ON" : "OFF"));
-                echo($"KILLS = " + (settings.kills ? "ON" : "OFF"));
-                echo($"KILLSRADIO = " + (settings.killsRadio ? "ON" : "OFF"));
-                echo($"DEATHS = " + (settings.deaths ? "ON" : "OFF"));
-                echo($"GREETS = " + (settings.greets ? "ON" : "OFF"));
-                echo($"CLANS = " + (settings.clanid ? "ON" : "OFF"));
-                echo($"CLANFX = " + (settings.clanid ? "ON" : "OFF"));
+                RCON.Echo($"OWO = " + (settings.owo ? "ON" : "OFF"));
+                RCON.Echo($"KILLS = " + (settings.kills ? "ON" : "OFF"));
+                RCON.Echo($"KILLSRADIO = " + (settings.killsRadio ? "ON" : "OFF"));
+                RCON.Echo($"DEATHS = " + (settings.deaths ? "ON" : "OFF"));
+                RCON.Echo($"GREETS = " + (settings.greets ? "ON" : "OFF"));
+                RCON.Echo($"CLANS = " + (settings.clanid ? "ON" : "OFF"));
+                RCON.Echo($"CLANFX = " + (settings.clanid ? "ON" : "OFF"));
                 break;
 
             case "OWO":
@@ -392,7 +394,7 @@ public static class Utils
             case "CLAN":
                 settings.clanid = set;
                 clanTimer.Enabled = set;
-                run("cl_clanid 0");
+                RCON.Run("cl_clanid 0");
                 break;
 
             case "CLANFX":
@@ -416,11 +418,11 @@ public static class Utils
                 break;
 
             default:
-                echo("somehow you broke the settings?");
+                RCON.Echo("somehow you broke the settings?");
                 break;
         }
         if (data[1] != "LIST")
-            echo(set ? $"{data[1]} enabled!" : $"{data[1]} disabled!");
+            RCON.Echo(set ? $"{data[1]} enabled!" : $"{data[1]} disabled!");
     }
 
     public const string msgCode = "‎ : "; // DONT TOUCH OR WE ALL DIE
@@ -460,9 +462,9 @@ public static class Utils
     /// </summary>
     public static async void rconParser()
     {
-        while (client.IsConnected)
+        while (!RCON.isAlive())
         {
-            string rawOutput = await client.ReadAsync();
+            string rawOutput = await RCON.client.ReadAsync();
 
             if (rawOutput.Length > 0)
             {
@@ -513,7 +515,7 @@ public static class Utils
                     }
                 }
             }
-            echo(final);
+            RCON.Echo(final);
             //owo(final); // "It just works" -Todd Howard
         }
     }
@@ -557,7 +559,7 @@ public static class Utils
         {
             try
             {
-                client = new PrimS.Telnet.Client("localhost", netPort, new System.Threading.CancellationToken()); // blocking
+                RCON = new RemCon.RCon("localhost", netPort);
                 connected = true;
                 break;
             }
@@ -567,7 +569,7 @@ public static class Utils
             }
         }
 
-        if (client.IsConnected) echo("RCON Connected!");
+        if (RCON.isAlive()) RCON.Echo("RCON Connected!");
         me = getMyCommunityID();
         initTimer();
         cookPasta();
