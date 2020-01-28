@@ -21,6 +21,7 @@ public class Settings
     public bool state = true;
     public bool owo = false;
     public bool kills = false;
+    public bool killsRadio = false;
     public bool deaths = false;
     public bool greets = false;
     public bool clanid = false;
@@ -370,6 +371,7 @@ public static class Utils
             case "LIST":
                 echo($"OWO = " + (settings.owo ? "ON" : "OFF"));
                 echo($"KILLS = " + (settings.kills ? "ON" : "OFF"));
+                echo($"KILLSRADIO = " + (settings.killsRadio ? "ON" : "OFF"));
                 echo($"DEATHS = " + (settings.deaths ? "ON" : "OFF"));
                 echo($"GREETS = " + (settings.greets ? "ON" : "OFF"));
                 echo($"CLANS = " + (settings.clanid ? "ON" : "OFF"));
@@ -392,6 +394,10 @@ public static class Utils
 
             case "KILLS":
                 settings.kills = set;
+                break;
+
+            case "KILLSRADIO":
+                settings.killsRadio = set;
                 break;
 
             case "DETH":
@@ -573,6 +579,7 @@ public static class Utils
         }*/
         
         // if we got here we should be all ready
+        // should run this in seperate thread?
         int[] storms_freq = new int[] { 880, 587, 698, 880, 587, 698, 880, 1047, 988, 784, 698, 784, 880, 587, 523, 658, 587 };
         int[] storms_len = new int[] { 500, 1000, 500, 500, 1000, 500, 250, 250, 500, 500, 250, 250, 500, 500, 250, 250, 750 };
         var storms = new PoopAudio.Tone(storms_freq, storms_len);

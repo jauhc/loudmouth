@@ -172,6 +172,11 @@ namespace loudmouth
         /// </summary>
         static void onKill(ref GameState gs)
         {
+            if (Utils.settings.killsRadio && !Utils.settings.kills)
+            {
+                Utils.owo("enemydown");
+                return;
+            }
             var cheese = new List<string>();
             if (gs.Player.State.Smoked > 32)
             {
@@ -223,7 +228,10 @@ namespace loudmouth
                     };
                 dad += postfix[Utils.rng.Next(postfix.Count)];
             }
-            Utils.owo("say " + dad + Environment.NewLine + "enemydown");
+            var output = "say " + dad;
+            if (Utils.settings.killsRadio)
+                output += Environment.NewLine + "enemydown";
+            Utils.owo(output);
         }
 
         /// <summary>
