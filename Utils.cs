@@ -99,7 +99,7 @@ public static class Utils
         speechTimer.Enabled = false;
 
         // clanTimer is for clanid spam
-        clanTimer = new System.Timers.Timer(300);
+        clanTimer = new System.Timers.Timer(483);
         clanTimer.Elapsed += clanSpam;
         clanTimer.Enabled = false;
     }
@@ -143,6 +143,7 @@ public static class Utils
 
     /// <summary>
     /// Read config and shit, warns and stuff if somethings wrong
+    /// WINDOWS ONLY
     /// </summary>
     static string readConfig()
     {
@@ -322,7 +323,7 @@ public static class Utils
         {
             echo("!commands available: !random, owo");
         }
-        else if (message.IndexOf("!gg") > -1 
+        else if (message.IndexOf("!gg") > -1
         || message.IndexOf("!rs") > -1)
         {
             owo($"unknown command, see commands available with !help");
@@ -409,8 +410,8 @@ public static class Utils
             echo(set ? $"{data[1]} enabled!" : $"{data[1]} disabled!");
     }
 
-    public static string msgCode = "‎ : "; // DONT TOUCH OR WE ALL DIE
-    public static string uniqueCode = "‎"; // DONT TOUCH OR WE ALL DIE
+    public const string msgCode = "‎ : "; // DONT TOUCH OR WE ALL DIE
+    public const string uniqueCode = "‎"; // DONT TOUCH OR WE ALL DIE
     public static void chatParser(ref string data)
     {
         bool teamSay = false;
@@ -430,7 +431,7 @@ public static class Utils
             caller = caller.Replace("*DEAD*", "");
             caller = caller.Replace("(Terrorist) ", "");
             caller = caller.Replace("(Counter-Terrorist) ", "");
-            if (caller.IndexOf(uniqueCode) > 0) caller = caller.Substring(0, caller.IndexOf(uniqueCode)+1);
+            if (caller.IndexOf(uniqueCode) > 0) caller = caller.Substring(0, caller.IndexOf(uniqueCode) + 1);
             if (caller.IndexOf(me) > -1)
                 return;
             // this shit only returns first character of persons name
@@ -469,7 +470,7 @@ public static class Utils
     /// </summary>
     public static void damageDone(ref string data)
     {
-        return; // broken for now - suggestion: REDO
+        return; // broken for now - suggestion: REDO // TODO
         int indexOne = data.IndexOf(" - Damage Given\r\n-------------------------"); // 13
         if (indexOne > -1)
         {
@@ -532,27 +533,27 @@ public static class Utils
         //Console.SetBufferSize(56, 15);
         Console.ForegroundColor = ConsoleColor.White;
         string cfg = readConfig();
-        if (cfg == "") 
+        if (cfg == "")
         {
             log(2, $"Could not find configuration");
             Environment.Exit(1);
         }
-        // add a timeout reconnect try catch or whatever
+
         bool connected = false;
-        while (!connected)
+        while (!connected) // 30s timeout loop
         {
-            try 
-	        {
+            try
+            {
                 client = new PrimS.Telnet.Client("localhost", netPort, new System.Threading.CancellationToken()); // blocking
                 connected = true;
                 break;
-	        }
-	        catch (Exception)
-	        {
-		        log(1, "Could not connect to remote console... retrying...");
-	        }
+            }
+            catch (Exception)
+            {
+                log(1, "Could not connect to remote console... retrying...");
+            }
         }
-        
+
         if (client.IsConnected) echo("RCON Connected!");
         me = getMyCommunityID();
         initTimer();
@@ -570,6 +571,13 @@ public static class Utils
                     myNode = p;
             });
         }*/
+        
+        // if we got here we should be all ready
+        int[] storms_freq = new int[] { 880, 587, 698, 880, 587, 698, 880, 1047, 988, 784, 698, 784, 880, 587, 523, 658, 587 };
+        int[] storms_len = new int[] { 500, 1000, 500, 500, 1000, 500, 250, 250, 500, 500, 250, 250, 500, 500, 250, 250, 750 };
+        var storms = new PoopAudio.Tone(storms_freq, storms_len);
+        PoopAudio.Audio.play(storms);
+        // remove above if issues
 
         if (_testing)
         {

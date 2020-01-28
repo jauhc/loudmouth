@@ -110,6 +110,9 @@ namespace loudmouth
                         Utils.owo($"Game start event");
                     }
 
+                    // TODO new round check so we can tab in etc
+                    // here
+
                     if (playerKills == -64)
                         playerKills = gs.Player.MatchStats.Kills;
                     var curkills = gs.Player.MatchStats.Kills;
