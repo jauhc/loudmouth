@@ -7,7 +7,7 @@ Powered by [CSGSI by rakijah](https://github.com/rakijah/CSGSI)
 
 ### Prerequisites
 - CSGO
-- .NET Core SDK for compiling
+- .NET Core Runtime
 
 ### Install & Usage
 - Running .NET Core binaries requires some sort of .NET runtime unless statically compiled
@@ -26,9 +26,12 @@ Powered by [CSGSI by rakijah](https://github.com/rakijah/CSGSI)
 ### Results
 ![results](https://github.com/jauhc/loudmouth/raw/master/rk_l.jpg)
 
-#### todo list
-the whole multikill jazz,
-finding install location on linux
+### todo list
+- the whole multikill jazz
+- proper text parsing from console (damage done)
+
+### optional features i wont prioritise
+- finding install location on linux
 
 
 ### Disclaimer

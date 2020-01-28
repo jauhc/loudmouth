@@ -11,6 +11,7 @@ namespace RemCon
 
         public void Run(string s)
         {
+            if (!Utils.settings.state) return;
             client.WriteLine($"{s}\n");
         }
 
