@@ -272,6 +272,7 @@ public static class Utils
         // vvoooo groups 1-10
         clanList.AddRange(new[] { 7670261, 7670266, 7670268, 7670273, 7670276, 7670621, 7670634, 7670641, 7670647 });
 
+        // TODO make toggles instead?
         run($"alias loud \"echo 0 LIST {cmdHash}\"");
         sleep(50);
 
@@ -366,13 +367,14 @@ public static class Utils
 
     /// <summary>
     /// checks when user sets commands from console
+    /// TODO a PROPER settings manager instead of this shit
     /// </summary>
     private static void checkCvars(string[] data)
     {
         bool set = (data[0] == "1") ? true : false;
         switch (data[1])
         {
-
+            // TODO prettify this pls? \t stuff?
             case "LIST":
                 echo($"OWO = " + (settings.owo ? "ON" : "OFF"));
                 echo($"KILLS = " + (settings.kills ? "ON" : "OFF"));
