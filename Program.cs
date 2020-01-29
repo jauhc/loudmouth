@@ -110,15 +110,22 @@ namespace loudmouth
                         Utils.owo($"Game start event");
                     }
 
-                    // TODO new round check so we can tab in etc
-                    // here
+                    // beep boop when round is over and new one has begun
+                    if (oldState.Round.Phase.ToString().ToLower() == "over"
+                        && gs.Round.Phase.ToString().ToLower() == "freezetime")
+                        {
+                            Console.Beep(800, 400);
+                            Console.Beep(400, 400);
+                            Console.Beep(100, 600);
+                        }
+
 
                     if (playerKills == -64)
                         playerKills = gs.Player.MatchStats.Kills;
                     var curkills = gs.Player.MatchStats.Kills;
                     if (curkills > playerKills)
                     {
-                        if (Utils.settings.kills)
+                        if (Utils.settings.kills || Utils.settings.killsRadio)
                             for (int i = 0; i < (curkills - playerKills); i++)
                             {
                                 if (Utils._puntualMode)

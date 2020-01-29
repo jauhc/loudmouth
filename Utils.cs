@@ -22,6 +22,7 @@ public class Settings
     public bool owo = false;
     public bool kills = false;
     public bool killsRadio = false;
+    public bool dmgReport = false;
     public bool deaths = false;
     public bool greets = false;
     public bool clanid = false;
@@ -79,7 +80,13 @@ public static class Utils
         log(0, data);
     }
     public static Action<string> echo = s => client.WriteLine($"echo [Loudmouth] - {s}\n");
-    public static Action<string> run = s => client.WriteLine($"{s}\n");
+    //public static Action<string> run = s => client.WriteLine($"{s}\n");
+    public static void run(string s)
+    {
+        if (!settings.state)
+            echo(s);
+        client.WriteLine($"{s}\n");
+    }
 
     /// <summary>
     /// Dumb wrapper for sleep method
@@ -276,9 +283,19 @@ public static class Utils
         run($"alias loud \"echo 0 LIST {cmdHash}\"");
         sleep(50);
 
+        run($"setinfo loud_state_o \"\"");
+        run($"alias loud_state_off \"echo 0 STATE {cmdHash}\"");
+        run($"alias loud_state_on \"echo 1 STATE {cmdHash}\"");
+        sleep(51);
+
         run($"setinfo loud_owo_o \"\"");
         run($"alias loud_owo_off \"echo 0 OWO {cmdHash}\"");
         run($"alias loud_owo_on \"echo 1 OWO {cmdHash}\"");
+        sleep(51);
+
+        run($"setinfo loud_dmgreport_o \"\"");
+        run($"alias loud_dmgreport_off \"echo 0 DMGREPORT {cmdHash}\"");
+        run($"alias loud_dmgreport_on \"echo 1 DMGREPORT {cmdHash}\"");
         sleep(51);
 
         run($"setinfo loud_kills_o \"\"");
@@ -321,19 +338,19 @@ public static class Utils
     {
         string sayCmd = "say ";
         if (teamChat) sayCmd = "say_team ";
-        if (sender.Trim() == myname.Trim()) sleep(1200);
+        if (sender.Trim() == myname.Trim()) return; // could sleep but meh
         // if (sender.IndexOf(myname) > -1) return;
         message = message.ToLower();
         // log("command triggered");
         // issue: sometimes doesnt reply at all?
         if (message.IndexOf("!help") > -1)
         {
-            echo("!commands available: !random, owo");
+            owo("say commands available: !random, owo");
         }
         else if (message.IndexOf("!gg") > -1
         || message.IndexOf("!rs") > -1)
         {
-            owo($"unknown command, see commands available with !help");
+            owo($"say unknown command, see commands available with !help");
         }
         else if (message.IndexOf("!random") > -1)
         {
@@ -376,13 +393,19 @@ public static class Utils
         {
             // TODO prettify this pls? \t stuff?
             case "LIST":
+                echo($"STATE = " + (settings.state ? "ON" : "OFF"));
                 echo($"OWO = " + (settings.owo ? "ON" : "OFF"));
+                echo($"DMGREPORT = " + (settings.dmgReport ? "ON" : "OFF"));
                 echo($"KILLS = " + (settings.kills ? "ON" : "OFF"));
                 echo($"KILLSRADIO = " + (settings.killsRadio ? "ON" : "OFF"));
                 echo($"DEATHS = " + (settings.deaths ? "ON" : "OFF"));
                 echo($"GREETS = " + (settings.greets ? "ON" : "OFF"));
                 echo($"CLANS = " + (settings.clanid ? "ON" : "OFF"));
                 echo($"CLANFX = " + (settings.clanid ? "ON" : "OFF"));
+                break;
+
+            case "STATE":
+                settings.state = set;
                 break;
 
             case "OWO":
@@ -396,6 +419,10 @@ public static class Utils
                 break;
 
             case "CLANFX":
+                settings.clanfx = set;
+                break;
+
+            case "DMGREPORT":
                 settings.clanfx = set;
                 break;
 
@@ -437,6 +464,7 @@ public static class Utils
                 if (dial[i].IndexOf(msgCode) > -1)
                     caller = dial[i];
             }
+            log(2, $"pre mod caller [{caller}]");
             // should just redo entirely using the LEFT-TO-RIGHT symbol as a landmark
             var message = caller.Substring(caller.pooperFind(':') + 2).Trim();
             caller = caller.Substring(0, caller.pooperFind(':') - 4).Trim();
@@ -466,9 +494,9 @@ public static class Utils
 
             if (rawOutput.Length > 0)
             {
-                Console.Write(rawOutput);
-                // add check here for IF WE WANT TO TELL DMG DONE
-                damageDone(ref rawOutput);
+                Console.Write(rawOutput); // prints out everything
+                if (settings.dmgReport)
+                    damageDone(ref rawOutput); // testing
                 chatParser(ref rawOutput);
 
                 int hashIdx = rawOutput.IndexOf(cmdHash);
@@ -481,41 +509,42 @@ public static class Utils
     /// <summary>
     /// parses damage done
     /// </summary>
+    /* REFERENCE
+
+-------------------------
+Damage Given to "Valar Morghulis" - 43 in 1 hit
+Damage Given to "poop" - 99 in 3 hits
+Damage Given to "ass" - 42 in 2 hits
+Player: e - Damage Taken
+-------------------------
+Damage Taken from "ZwuenieBoyy A_\_(a??)_/A_" - 69 in 1 hit
+
+
+    */
     public static void damageDone(ref string data)
     {
-        return; // broken for now - suggestion: REDO // TODO
-        int indexOne = data.IndexOf(" - Damage Given\r\n-------------------------"); // 13
-        if (indexOne > -1)
+        string final = "";
+        var first_idx = data.IndexOf("-------------------------\r\nDamage Given to ");
+        Console.WriteLine($"first idx {first_idx}");
+        if (first_idx > -1)
         {
-            data = data.Substring(indexOne + 44);
-            string[] outputLines = data.Split("\r\n");
-            string final = "";
-            for (ushort i = 0; i < outputLines.Length - 1; i++)
+            var lined_output = data.Split(Environment.NewLine);
+            for (int i = 1; i < lined_output.Length; i++)
             {
-                if (isFriendHere(outputLines[i]))
-                    continue;
-                int indexTwo = outputLines[i].LastIndexOf("-");
-                if (indexTwo > -1)
-                {
-                    if (outputLines[i].IndexOf("hit") > -1)
-                    {
-                        outputLines[i] = outputLines[i].Substring(indexTwo + 2);
-                        outputLines[i] = outputLines[i].Substring(0, outputLines[i].IndexOf(" "));
-                        try
-                        {
-                            if (Int32.Parse(outputLines[i]) < 100 || Int32.Parse(outputLines[i]) > 15)
-                                final += $"-{outputLines[i]} ";
-                        }
-                        catch (System.Exception e)
-                        {
-                            log(1, $"{e}");
-                        }
-                    }
-                }
+                var breaking_point1 = lined_output[i].IndexOf("Damage Taken");
+                var breaking_point2 = lined_output[i + 1].IndexOf("-------------------------");
+                //Console.WriteLine($"bb1: {breaking_point1} | bb2: {breaking_point2}");
+                if (breaking_point1 > -1 && breaking_point2 > -1) break;
+                var last_dash = lined_output[i].LastIndexOf('-');
+                var split_line = lined_output[i].Substring(last_dash);
+                var end_of_line = lined_output[i].IndexOf(" in ");
+                Console.WriteLine($"LINE NUMBER {i}: {split_line} dash@{last_dash} eol@{end_of_line}");
+                var dmg = int.Parse(lined_output[i].Substring(last_dash + 2, end_of_line - last_dash - 1));
+                if (dmg > 99) continue;
+                final += $"-{lined_output[i].Substring(last_dash + 2, end_of_line - last_dash - 1)}";
             }
-            echo(final);
-            //owo(final); // "It just works" -Todd Howard
         }
+        log($"\n\n[DMGDONETEST] output: {final}\n");
     }
 
     /// <summary>
@@ -584,15 +613,16 @@ public static class Utils
                     myNode = p;
             });
         }*/
-        
+
         // if we got here we should be all ready
-        // should run this in seperate thread?
+        // should run this in seperate thread? //TODO
+        /*
         int[] storms_freq = new int[] { 880, 587, 698, 880, 587, 698, 880, 1047, 988, 784, 698, 784, 880, 587, 523, 658, 587 };
         int[] storms_len = new int[] { 500, 1000, 500, 500, 1000, 500, 250, 250, 500, 500, 250, 250, 500, 500, 250, 250, 750 };
         var storms = new PoopAudio.Tone(storms_freq, storms_len);
         PoopAudio.Audio.play(storms);
         // remove above if issues
-
+        */
         if (_testing)
         {
             Console.Title = $"[dev] {Console.Title} ({me})";
