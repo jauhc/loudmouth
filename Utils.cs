@@ -538,7 +538,7 @@ Damage Taken from "ZwuenieBoyy A_\_(a??)_/A_" - 69 in 1 hit
                 var last_dash = lined_output[i].LastIndexOf('-');
                 var split_line = lined_output[i].Substring(last_dash);
                 var end_of_line = lined_output[i].IndexOf(" in ");
-                Console.WriteLine($"LINE NUMBER {i}: {split_line} dash@{last_dash} eol@{end_of_line}");
+                // Console.WriteLine($"LINE NUMBER {i}: {split_line} dash@{last_dash} eol@{end_of_line}");
                 var dmg = int.Parse(lined_output[i].Substring(last_dash + 2, end_of_line - last_dash - 1));
                 if (dmg > 99) continue;
                 final += $"-{lined_output[i].Substring(last_dash + 2, end_of_line - last_dash - 1)}";

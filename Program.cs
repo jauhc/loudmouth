@@ -110,11 +110,11 @@ namespace loudmouth
                         Utils.owo($"Game start event");
                     }
 
-                    // beep boop when round is over and new one has begun
+                    // beep boop when round is over and new one has begun // TODO thread it along with poopaudio
                     if (oldState.Round.Phase.ToString().ToLower() == "over"
                         && gs.Round.Phase.ToString().ToLower() == "freezetime")
                         {
-                            Console.Beep(800, 400);
+                            Console.Beep(800, 700);
                             Console.Beep(400, 400);
                             Console.Beep(100, 600);
                         }
