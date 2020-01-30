@@ -36,9 +36,9 @@ namespace loudmouth
             for (int i = 0; i < args.Length; i++)
             {   // oh god please there has to be a better way of doing this
                 // if (args[i].ToLower.IndexOf("gameport") > -1)
-                    // Utils.gamePort = int.Parse(args[i].Substring(9));
+                // Utils.gamePort = int.Parse(args[i].Substring(9));
                 // if (args[i].ToLower.IndexOf("netport") > -1)
-                    // Utils.netPort = int.Parse(args[i].Substring(8));
+                // Utils.netPort = int.Parse(args[i].Substring(8));
                 if (args[i] == "dev")
                     Utils._testing = true;
                 if (args[i] == "s")
@@ -88,89 +88,94 @@ namespace loudmouth
         static void OnNewGameState(GameState gs)
         {
             if (gs.Player.HasData)
-            if (Utils.myname.Length == 0) Utils.myname = gs.Player.Name;
-                if (Utils.bGameActive(ref gs) && isLocalPlayer(ref gs))
+                if (Utils.myname.Length == 0) Utils.myname = gs.Player.Name;
+            if (Object.Equals(oldState, default(GameState)))
+            {
+                oldState = gs;
+                return;
+            }
+            if (Utils.bGameActive(ref gs) && isLocalPlayer(ref gs))
+            {
+                // share gamestate
+                Utils.gameState = gs;
+
+                if (((double)gs.Player.Weapons.ActiveWeapon.AmmoClip / (double)gs.Player.Weapons.ActiveWeapon.AmmoClipMax) < 0.3
+                && (gs.Player.Weapons.ActiveWeapon.AmmoClip < oldState.Player.Weapons.ActiveWeapon.AmmoClip)
+                && isGun(gs.Player.Weapons.ActiveWeapon.Type)
+                && gs.Player.Weapons.ActiveWeapon.AmmoClipMax > 1)
+                    Console.Beep(2334, 256);
+                oldAmmo = gs.Player.Weapons.ActiveWeapon.AmmoClip;
+
+                // round 1 start check thing
+                if (gs.Round.Phase.ToString().ToLower() == "live"
+                && gs.Map.Round == 1
+                && (oldState.Map.Phase.ToString().ToLower() == "freezetime"
+                && oldState.Round.Phase.ToString().ToLower() == "freezetime"))
                 {
-                    // share gamestate
-                    Utils.gameState = gs;
-
-                    if (((double)gs.Player.Weapons.ActiveWeapon.AmmoClip / (double)gs.Player.Weapons.ActiveWeapon.AmmoClipMax) < 0.3
-                    && (gs.Player.Weapons.ActiveWeapon.AmmoClip < oldState.Player.Weapons.ActiveWeapon.AmmoClip)
-                    && isGun(gs.Player.Weapons.ActiveWeapon.Type)
-                    && gs.Player.Weapons.ActiveWeapon.AmmoClipMax > 1)
-                        Console.Beep(2334, 256);
-                    oldAmmo = gs.Player.Weapons.ActiveWeapon.AmmoClip;
-
-                    // round 1 start check thing
-                    if (gs.Round.Phase.ToString().ToLower() == "live"
-                    && gs.Map.Round == 1
-                    && (oldState.Map.Phase.ToString().ToLower() == "freezetime"
-                    && oldState.Round.Phase.ToString().ToLower() == "freezetime"))
-                    {
-                        Utils.owo($"Game start event");
-                    }
-
-                    // beep boop when round is over and new one has begun // TODO thread it along with poopaudio
-                    if (oldState.Round.Phase.ToString().ToLower() == "over"
-                        && gs.Round.Phase.ToString().ToLower() == "freezetime")
-                        {
-                            Console.Beep(800, 700);
-                            Console.Beep(400, 400);
-                            Console.Beep(100, 600);
-                        }
-
-
-                    if (playerKills == -64)
-                        playerKills = gs.Player.MatchStats.Kills;
-                    var curkills = gs.Player.MatchStats.Kills;
-                    if (curkills > playerKills)
-                    {
-                        if (Utils.settings.kills || Utils.settings.killsRadio)
-                            for (int i = 0; i < (curkills - playerKills); i++)
-                            {
-                                if (Utils._puntualMode)
-                                {
-                                    string o = $"Kill #{gs.Player.State.RoundKills} [Round {(gs.Map.Round + 1).ToString()}]";
-                                    //o += $" [{gs.Player.Weapons.ActiveWeapon.Name.Substring(7).ToUpper()}]";
-                                    //if (gs.Player.Weapons.ActiveWeapon.AmmoClipMax > 0) o+= $"({gs.Player.Weapons.ActiveWeapon.AmmoClip}/{gs.Player.Weapons.ActiveWeapon.AmmoClipMax}) ";
-                                    if (gs.Player.State.RoundKillHS > roundHS)
-                                    {
-                                        o += $" (HS)";
-                                    }
-                                    roundHS = gs.Player.State.RoundKillHS;
-                                    if (gs.Player.State.Flashed != 0)
-                                        o += $" / {Math.Round((double)(gs.Player.State.Flashed / (double)255) * 100, 1)}% flashed";
-                                    if (gs.Player.State.Smoked != 0)
-                                        o += $" / {Math.Round((double)(gs.Player.State.Smoked / (double)255) * 100, 1)}% smoked";
-                                    if (gs.Player.State.Burning != 0)
-                                        o += $" / {Math.Round((double)(gs.Player.State.Burning / (double)255) * 100, 1)}% burning";
-                                    o += $"{Environment.NewLine} enemydown";
-                                    Utils.owo(o);
-                                }
-                                if (Utils._singlesMode)
-                                    Utils.owo("+" + Environment.NewLine + "enemydown");
-                                else if (!Utils._singlesMode && !Utils._puntualMode)
-                                    onKill(ref gs);
-                            }
-                    }
-                    playerKills = curkills;
-
-
-                    if (myDeaths == -1)
-                        myDeaths = gs.Player.MatchStats.Deaths;
-                    var curDeaths = gs.Player.MatchStats.Deaths;
-                    if (Utils.settings.deaths)
-                        if (curDeaths > myDeaths && !(gs.Map.Round == 1 && gs.Player.MatchStats.Deaths == 0))
-                        {
-                            if (Utils._puntualMode) // todo
-                                Utils.owo("oops i have died");
-                            if (Utils._singlesMode)
-                                Utils.owo("-");
-                            else if (!Utils._singlesMode && !Utils._puntualMode)
-                                onDeath(ref gs);
-                        }
-                    myDeaths = curDeaths;
+                    Utils.owo($"Game start event");
                 }
+
+                // beep boop when round is over and new one has begun // TODO thread it along with poopaudio
+                if (oldState.Round.Phase.ToString().ToLower() == "over"
+                    && gs.Round.Phase.ToString().ToLower() == "freezetime")
+                {
+                    Console.Beep(800, 700);
+                    Console.Beep(400, 400);
+                    Console.Beep(100, 600);
+                }
+
+
+                if (playerKills == -64)
+                    playerKills = gs.Player.MatchStats.Kills;
+                var curkills = gs.Player.MatchStats.Kills;
+                if (curkills > playerKills)
+                {
+                    if (Utils.settings.kills || Utils.settings.killsRadio)
+                        for (int i = 0; i < (curkills - playerKills); i++)
+                        {
+                            if (Utils._puntualMode)
+                            {
+                                string o = $"Kill #{gs.Player.State.RoundKills} [Round {(gs.Map.Round + 1).ToString()}]";
+                                //o += $" [{gs.Player.Weapons.ActiveWeapon.Name.Substring(7).ToUpper()}]";
+                                //if (gs.Player.Weapons.ActiveWeapon.AmmoClipMax > 0) o+= $"({gs.Player.Weapons.ActiveWeapon.AmmoClip}/{gs.Player.Weapons.ActiveWeapon.AmmoClipMax}) ";
+                                if (gs.Player.State.RoundKillHS > roundHS)
+                                {
+                                    o += $" (HS)";
+                                }
+                                roundHS = gs.Player.State.RoundKillHS;
+                                if (gs.Player.State.Flashed != 0)
+                                    o += $" / {Math.Round((double)(gs.Player.State.Flashed / (double)255) * 100, 1)}% flashed";
+                                if (gs.Player.State.Smoked != 0)
+                                    o += $" / {Math.Round((double)(gs.Player.State.Smoked / (double)255) * 100, 1)}% smoked";
+                                if (gs.Player.State.Burning != 0)
+                                    o += $" / {Math.Round((double)(gs.Player.State.Burning / (double)255) * 100, 1)}% burning";
+                                o += $"{Environment.NewLine} enemydown";
+                                Utils.owo(o);
+                            }
+                            if (Utils._singlesMode)
+                                Utils.owo("+" + Environment.NewLine + "enemydown");
+                            else if (!Utils._singlesMode && !Utils._puntualMode)
+                                onKill(ref gs);
+                        }
+                }
+                playerKills = curkills;
+
+
+                if (myDeaths == -1)
+                    myDeaths = gs.Player.MatchStats.Deaths;
+                var curDeaths = gs.Player.MatchStats.Deaths;
+                if (Utils.settings.deaths)
+                    if (curDeaths > myDeaths && !(gs.Map.Round == 1 && gs.Player.MatchStats.Deaths == 0))
+                    {
+                        if (Utils._puntualMode) // todo
+                            Utils.owo("oops i have died");
+                        if (Utils._singlesMode)
+                            Utils.owo("-");
+                        else if (!Utils._singlesMode && !Utils._puntualMode)
+                            onDeath(ref gs);
+                    }
+                myDeaths = curDeaths;
+            }
             oldState = gs;
         }
 

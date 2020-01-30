@@ -19,14 +19,14 @@ Purpose of file:
 public class Settings
 {
     public bool state = true;
-    public bool owo = false;
+    public bool owo = true;
     public bool kills = false;
-    public bool killsRadio = false;
+    public bool killsRadio = true;
     public bool dmgReport = false;
     public bool deaths = false;
     public bool greets = false;
     public bool clanid = false;
-    public bool clanfx = false;
+    public bool clanfx = true;
 }
 public static class Utils
 {
@@ -109,7 +109,7 @@ public static class Utils
         // clanTimer is for clanid spam
         clanTimer = new System.Timers.Timer(483);
         clanTimer.Elapsed += clanSpam;
-        clanTimer.Enabled = false;
+        clanTimer.Enabled = (settings.clanid || settings.clanfx);
     }
 
     private static int clanIdx = 0;
@@ -423,7 +423,7 @@ public static class Utils
                 break;
 
             case "DMGREPORT":
-                settings.clanfx = set;
+                settings.dmgReport = set;
                 break;
 
             case "KILLS":
@@ -509,28 +509,18 @@ public static class Utils
     /// <summary>
     /// parses damage done
     /// </summary>
-    /* REFERENCE
-
--------------------------
-Damage Given to "Valar Morghulis" - 43 in 1 hit
-Damage Given to "poop" - 99 in 3 hits
-Damage Given to "ass" - 42 in 2 hits
-Player: e - Damage Taken
--------------------------
-Damage Taken from "ZwuenieBoyy A_\_(a??)_/A_" - 69 in 1 hit
-
-
-    */
     public static void damageDone(ref string data)
     {
         string final = "";
         var first_idx = data.IndexOf("-------------------------\r\nDamage Given to ");
-        Console.WriteLine($"first idx {first_idx}");
+        //Console.WriteLine($"first idx {first_idx}");
         if (first_idx > -1)
         {
             var lined_output = data.Split(Environment.NewLine);
             for (int i = 1; i < lined_output.Length; i++)
             {
+                // TODO get player name from output and check if alive via GSI
+                var dmg = 0;
                 var breaking_point1 = lined_output[i].IndexOf("Damage Taken");
                 var breaking_point2 = lined_output[i + 1].IndexOf("-------------------------");
                 //Console.WriteLine($"bb1: {breaking_point1} | bb2: {breaking_point2}");
@@ -538,13 +528,22 @@ Damage Taken from "ZwuenieBoyy A_\_(a??)_/A_" - 69 in 1 hit
                 var last_dash = lined_output[i].LastIndexOf('-');
                 var split_line = lined_output[i].Substring(last_dash);
                 var end_of_line = lined_output[i].IndexOf(" in ");
-                // Console.WriteLine($"LINE NUMBER {i}: {split_line} dash@{last_dash} eol@{end_of_line}");
-                var dmg = int.Parse(lined_output[i].Substring(last_dash + 2, end_of_line - last_dash - 1));
-                if (dmg > 99) continue;
+                if (lined_output[i] == "-------------------------") continue;
+                Console.WriteLine($"LINE NUMBER {i}: {split_line} dash@{last_dash} eol@{end_of_line}");
+                Console.WriteLine($"LATEST LINE: {lined_output[i]}");
+                try
+                {
+                    dmg = int.Parse(lined_output[i].Substring(last_dash + 2, end_of_line - last_dash - 1));
+                }
+                catch (System.Exception e)
+                {
+                    throw e;
+                }
+                if (dmg > 99 || dmg < 1) continue;
                 final += $"-{lined_output[i].Substring(last_dash + 2, end_of_line - last_dash - 1)}";
             }
+            log($"\n\n[DMGDONETEST] output: {final}\n");
         }
-        log($"\n\n[DMGDONETEST] output: {final}\n");
     }
 
     /// <summary>
