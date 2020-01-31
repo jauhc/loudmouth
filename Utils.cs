@@ -28,8 +28,10 @@ public class Settings
     public bool clanid = false;
     public bool clanfx = true;
 }
+
 public static class Utils
 {
+
     static System.Timers.Timer speechTimer, clanTimer;
     public static readonly Random rng = new Random();
     public static readonly string cmdHash = terribleHash(14); // for command verification purposes
@@ -520,17 +522,20 @@ public static class Utils
             for (int i = 1; i < lined_output.Length; i++)
             {
                 // TODO get player name from output and check if alive via GSI
+                // very simple if using sanitised names
+                // also no friendly fire check
                 var dmg = 0;
                 var breaking_point1 = lined_output[i].IndexOf("Damage Taken");
                 var breaking_point2 = lined_output[i + 1].IndexOf("-------------------------");
                 //Console.WriteLine($"bb1: {breaking_point1} | bb2: {breaking_point2}");
                 if (breaking_point1 > -1 && breaking_point2 > -1) break;
+                if (isFriendHere(lined_output[i])) continue; // might cause issues in ffa dm
                 var last_dash = lined_output[i].LastIndexOf('-');
                 var split_line = lined_output[i].Substring(last_dash);
                 var end_of_line = lined_output[i].IndexOf(" in ");
                 if (lined_output[i] == "-------------------------") continue;
-                Console.WriteLine($"LINE NUMBER {i}: {split_line} dash@{last_dash} eol@{end_of_line}");
-                Console.WriteLine($"LATEST LINE: {lined_output[i]}");
+                //Console.WriteLine($"LINE NUMBER {i}: {split_line} dash@{last_dash} eol@{end_of_line}");
+                //Console.WriteLine($"LATEST LINE: {lined_output[i]}");
                 try
                 {
                     dmg = int.Parse(lined_output[i].Substring(last_dash + 2, end_of_line - last_dash - 1));
@@ -565,11 +570,31 @@ public static class Utils
     }
 
     /// <summary>
+    /// dumb
+    /// </summary>
+    public static string getCommit()
+    {
+        try
+        {   // Open the text file using a stream reader.
+            using (System.IO.StreamReader sr = new System.IO.StreamReader("./.git/ORIG_HEAD"))
+            {
+            // Read the stream to a string, and write the string to the console.
+                string line = sr.ReadToEnd();
+                return line.Substring(0,7);
+            }
+        }
+        catch (System.IO.IOException)
+        {
+            return "";
+        }
+    }
+
+    /// <summary>
     /// Set style of console window and initialises variables
     /// </summary>
     public static void Init()
     {
-        Console.Title = "Project loudmouth";
+        Console.Title = $"Project loudmouth ({getCommit()})";
         //Console.SetWindowSize(56, 15);
         //Console.SetBufferSize(56, 15);
         Console.ForegroundColor = ConsoleColor.White;
