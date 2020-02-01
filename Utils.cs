@@ -283,52 +283,52 @@ public static class Utils
 
         // TODO make toggles instead?
         run($"alias loud \"echo 0 LIST {cmdHash}\"");
-        sleep(50);
+        sleep(50, 16);
 
         run($"setinfo loud_state_o \"\"");
         run($"alias loud_state_off \"echo 0 STATE {cmdHash}\"");
         run($"alias loud_state_on \"echo 1 STATE {cmdHash}\"");
-        sleep(51);
+        sleep(50, 16);
 
         run($"setinfo loud_owo_o \"\"");
         run($"alias loud_owo_off \"echo 0 OWO {cmdHash}\"");
         run($"alias loud_owo_on \"echo 1 OWO {cmdHash}\"");
-        sleep(51);
+        sleep(50, 16);
 
         run($"setinfo loud_dmgreport_o \"\"");
         run($"alias loud_dmgreport_off \"echo 0 DMGREPORT {cmdHash}\"");
         run($"alias loud_dmgreport_on \"echo 1 DMGREPORT {cmdHash}\"");
-        sleep(51);
+        sleep(50, 16);
 
         run($"setinfo loud_kills_o \"\"");
         run($"alias loud_kills_off \"echo 0 KILLS {cmdHash}\"");
         run($"alias loud_kills_on \"echo 1 KILLS {cmdHash}\"");
-        sleep(51);
+        sleep(50, 16);
 
         run($"setinfo loud_killradio_o \"\"");
         run($"alias loud_killradio_off \"echo 0 KILLSRADIO {cmdHash}\"");
         run($"alias loud_killradio_on \"echo 1 KILLSRADIO {cmdHash}\"");
-        sleep(51);
+        sleep(50, 16);
 
         run($"setinfo loud_death_o \"\"");
         run($"alias loud_death_off \"echo 0 DETH {cmdHash}\"");
         run($"alias loud_death_on \"echo 1 DETH {cmdHash}\"");
-        sleep(51);
+        sleep(50, 16);
 
         run($"setinfo loud_greet_o \"\"");
         run($"alias loud_greet_off \"echo 0 GREET {cmdHash}\"");
         run($"alias loud_greet_on \"echo 1 GREET {cmdHash}\"");
-        sleep(51);
+        sleep(50, 16);
 
         run($"setinfo loud_clan_o \"\"");
         run($"alias loud_clan_off \"echo 0 CLAN {cmdHash}\"");
         run($"alias loud_clan_on \"echo 1 CLAN {cmdHash}\"");
-        sleep(51);
+        sleep(50, 16);
 
         run($"setinfo loud_clan_wave_o \"\"");
         run($"alias loud_clan_wave_off \"echo 0 CLANFX {cmdHash}\"");
         run($"alias loud_clan_wave_on \"echo 1 CLANFX {cmdHash}\"");
-        sleep(51);
+        sleep(50, 16);
 
         echo("Commands created!");
     }
@@ -338,13 +338,13 @@ public static class Utils
     /// </summary>
     private static void chatCommand(string sender, string message, bool teamChat = false)
     {
+        if (message == "") return; // because you can type a space in chat and crash this, not sure if correct place to check, didnt look at stackdump
         string sayCmd = "say ";
         if (teamChat) sayCmd = "say_team ";
         if (sender.Trim() == myname.Trim()) return; // could sleep but meh
         // if (sender.IndexOf(myname) > -1) return;
         message = message.ToLower();
-        // log("command triggered");
-        // issue: sometimes doesnt reply at all?
+        
         if (message.IndexOf("!help") > -1)
         {
             owo("say commands available: !random, owo");
