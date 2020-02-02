@@ -481,23 +481,23 @@ public static class Utils
             }
             try
             {
-                // TODO redo this shit to actually use the symbol
-                log(2, $"pre mod caller [{caller}]");
-                // should just redo entirely using the LEFT-TO-RIGHT symbol as a landmark
-                var message = caller.Substring(caller.pooperFind(':') + 2).Trim();
-                caller = caller.Substring(0, caller.pooperFind(':') - 4).Trim();
-                if (caller.IndexOf("(Terrorist)") > -1 || caller.IndexOf("(Counter-Terrorist)") > -1) teamSay = true;
-                caller = caller.Replace("*DEAD*", "");
-                caller = caller.Replace("(Terrorist) ", "");
-                caller = caller.Replace("(Counter-Terrorist) ", "");
-                if (caller.IndexOf(uniqueCode) > 0) caller = caller.Substring(0, caller.IndexOf(uniqueCode) + 1);
-                if (caller.IndexOf(myname) > -1)
-                    return;
-                // this shit only returns first character of persons name
+                string message = caller.Substring(caller.IndexOf(msgCode) + 3).Trim();
 
-                // make self check ignore, "status" in console breaks this
-                log(2, $"caller id [{caller}] says: {message}");
-                chatCommand(caller, message, teamSay);
+                if (caller.IndexOf("Terrorist) ") > -1) teamSay = true;
+                string sender = caller.Substring(0, caller.IndexOf(msgCode))
+                .Replace("*DEAD*", "")
+                .Replace("(Terrorist) ", "")
+                .Replace("(Counter-Terrorist) ", "");
+                if (teamSay)
+                {
+                    int atAt = sender.LastIndexOf("@");
+                    sender = sender.Substring(0, atAt - 1);
+                }
+                if (sender.LastIndexOf(uniqueCode) > -1)
+                    sender = sender.Substring(0, sender.Length - 3);
+                string teamPrefix = teamSay ? "(TEAM)" : "";
+                log(2, $"{teamPrefix} sender id [{sender}] says: {message}");
+                chatCommand(sender, message, teamSay);
             }
             catch (System.Exception e)
             {
@@ -636,7 +636,9 @@ public static class Utils
         {
             log(2, $"Could not find configuration");
             Environment.Exit(1);
-        } else if (cfg == "notwindows") {
+        }
+        else if (cfg == "notwindows")
+        {
             log(1, "attempted to do windows specific config on nonwindows platform");
         }
 
@@ -709,7 +711,8 @@ public static class Utils
     /// </summary>
     static String getMyCommunityID()
     {
-        if (!isWindows()) {
+        if (!isWindows())
+        {
             log(1, "attempted to do windows specific registry read on nonwindows platform");
             return "";
         }
