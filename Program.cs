@@ -142,7 +142,7 @@ this is possible BUT autoconfig will not work");
                         {
                             if (Utils._puntualMode)
                             {
-                                string o = $"Kill #{gs.Player.State.RoundKills} [Round {(gs.Map.Round + 1).ToString()}]";
+                                string o = $"say Kill #{gs.Player.State.RoundKills} [Round {(gs.Map.Round + 1).ToString()}]";
                                 //o += $" [{gs.Player.Weapons.ActiveWeapon.Name.Substring(7).ToUpper()}]";
                                 //if (gs.Player.Weapons.ActiveWeapon.AmmoClipMax > 0) o+= $"({gs.Player.Weapons.ActiveWeapon.AmmoClip}/{gs.Player.Weapons.ActiveWeapon.AmmoClipMax}) ";
                                 if (gs.Player.State.RoundKillHS > roundHS)
@@ -160,7 +160,7 @@ this is possible BUT autoconfig will not work");
                                 Utils.owo(o);
                             }
                             if (Utils._singlesMode)
-                                Utils.owo("beep boop i got a kill" + Environment.NewLine + "enemydown");
+                                Utils.owo("say beep boop i got a kill" + Environment.NewLine + "enemydown");
                             else if (!Utils._singlesMode && !Utils._puntualMode)
                                 onKill(ref gs);
                         }
@@ -172,12 +172,13 @@ this is possible BUT autoconfig will not work");
                     myDeaths = gs.Player.MatchStats.Deaths;
                 var curDeaths = gs.Player.MatchStats.Deaths;
                 if (Utils.settings.deaths)
+                // TODO logic needs improving here
                     if (curDeaths > myDeaths && !(gs.Map.Round == 1 && gs.Player.MatchStats.Deaths == 0))
                     {
                         if (Utils._puntualMode) // todo
-                            Utils.owo("oops i have died");
+                            Utils.owo("say oops i have died");
                         if (Utils._singlesMode)
-                            Utils.owo("ouch ow i died");
+                            Utils.owo("say ouch ow i died");
                         else if (!Utils._singlesMode && !Utils._puntualMode)
                             onDeath(ref gs);
                     }
