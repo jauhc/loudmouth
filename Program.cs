@@ -33,6 +33,11 @@ namespace loudmouth
         /// </summary>
         static void Main(string[] args)
         {
+            if (!Utils.isWindows())
+            {
+                Utils.log(1, @$"uh oh, looks like youre trying to run this NOT on windows,\n
+this is possible BUT autoconfig will not work");
+            }
             int port = 1338;
             // Parse args
             for (int i = 0; i < args.Length; i++)

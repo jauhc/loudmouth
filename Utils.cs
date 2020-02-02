@@ -102,6 +102,15 @@ public static class Utils
             System.Threading.Thread.Sleep(ms);
     }
 
+    /// <summary>
+    /// are we on windows?
+    /// </summary>
+    public static bool isWindows()
+    {
+        return System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(
+            System.Runtime.InteropServices.OSPlatform.Windows);
+    }
+
     static void initTimer()
     {
         // speechTimer is for speaking
@@ -158,6 +167,9 @@ public static class Utils
     /// </summary>
     static string readConfig()
     {
+        if (!isWindows())
+            return "notwindows";
+
         string blob = "\"loudmouth\"\n{\n\t\"uri\" \"http://localhost:" + gamePort + "\"\n\t\"timeout\" \"5.0\"\n\t\"buffer\"  \"0.05\"\n\t\"throttle\" \"0.1\"\n\t\"heartbeat\" \"3.0\"\n\t\"data\"\n\t{\n\t\t\"provider\"\t\t\t\t\t\"1\"\n\t\t\"map\"\t\t\t\t\t\t\"1\"\n\t\t\"round\"\t\t\t\t\t\t\"1\"\n\t\t\"player_id\"\t\t\t\t\t\"1\"\n\t\t\"player_weapons\"\t\t\t\"1\"\n\t\t\"player_match_stats\"\t\t\"1\"\n\t\t\"player_state\"\t\t\t\t\"1\"\n\t\t\"allplayers_id\"\t\t\t\t\"1\"\n\t\t\"allplayers_state\"\t\t\t\"1\"\n\t\t\"allplayers_match_stats\"\t\"1\"\n\t}\n}";
         var steamRegv = Microsoft.Win32.Registry.GetValue("HKEY_CURRENT_USER\\Software\\Valve\\Steam\\", "SteamPath", 0);
         string libraryFile = System.IO.File.ReadAllText($"{steamRegv}\\steamapps\\libraryfolders.vdf").Trim();
@@ -624,6 +636,8 @@ public static class Utils
         {
             log(2, $"Could not find configuration");
             Environment.Exit(1);
+        } else if (cfg == "notwindows") {
+            log(1, "attempted to do windows specific config on nonwindows platform");
         }
 
         bool connected = false;
@@ -695,6 +709,10 @@ public static class Utils
     /// </summary>
     static String getMyCommunityID()
     {
+        if (!isWindows()) {
+            log(1, "attempted to do windows specific registry read on nonwindows platform");
+            return "";
+        }
         // sort of found this method by accident, nothing on google about this!
         var steam3ID = Microsoft.Win32.Registry.GetValue("HKEY_CURRENT_USER\\Software\\Valve\\Steam\\ActiveProcess", "ActiveUser", 0);
         if (steam3ID == null)
