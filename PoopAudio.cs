@@ -12,7 +12,7 @@ namespace PoopAudio
             len = length;
         }
     }
-    class Audio
+    public class Audio
     {
         static float playbackrate = 0.75f;
 
@@ -32,6 +32,11 @@ namespace PoopAudio
                 Console.Beep(tune.freq[i], playb(tune.len[i]));
                 pause(70);
             }
+        }
+
+        public Audio()
+        {
+            Utils.log("Audio Player created");
         }
 
     }

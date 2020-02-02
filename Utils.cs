@@ -50,6 +50,7 @@ public static class Utils
     public static List<string> teamMates = new List<string>();
     public static Settings settings = new Settings();
     public static PrimS.Telnet.Client client;
+    public static PoopAudio.Audio audioPlayer = new PoopAudio.Audio();
 
     /// <summary>
     /// A fancy log method, 0 = INFO, 1 = ERROR, 2 = WARN
@@ -344,7 +345,7 @@ public static class Utils
         if (sender.Trim() == myname.Trim()) return; // could sleep but meh
         // if (sender.IndexOf(myname) > -1) return;
         message = message.ToLower();
-        
+
         if (message.IndexOf("!help") > -1)
         {
             owo("say commands available: !random, owo");
@@ -466,22 +467,31 @@ public static class Utils
                 if (dial[i].IndexOf(msgCode) > -1)
                     caller = dial[i];
             }
-            log(2, $"pre mod caller [{caller}]");
-            // should just redo entirely using the LEFT-TO-RIGHT symbol as a landmark
-            var message = caller.Substring(caller.pooperFind(':') + 2).Trim();
-            caller = caller.Substring(0, caller.pooperFind(':') - 4).Trim();
-            if (caller.IndexOf("(Terrorist)") > -1 || caller.IndexOf("(Counter-Terrorist)") > -1) teamSay = true;
-            caller = caller.Replace("*DEAD*", "");
-            caller = caller.Replace("(Terrorist) ", "");
-            caller = caller.Replace("(Counter-Terrorist) ", "");
-            if (caller.IndexOf(uniqueCode) > 0) caller = caller.Substring(0, caller.IndexOf(uniqueCode) + 1);
-            if (caller.IndexOf(me) > -1)
-                return;
-            // this shit only returns first character of persons name
+            try
+            {
+                // TODO redo this shit to actually use the symbol
+                log(2, $"pre mod caller [{caller}]");
+                // should just redo entirely using the LEFT-TO-RIGHT symbol as a landmark
+                var message = caller.Substring(caller.pooperFind(':') + 2).Trim();
+                caller = caller.Substring(0, caller.pooperFind(':') - 4).Trim();
+                if (caller.IndexOf("(Terrorist)") > -1 || caller.IndexOf("(Counter-Terrorist)") > -1) teamSay = true;
+                caller = caller.Replace("*DEAD*", "");
+                caller = caller.Replace("(Terrorist) ", "");
+                caller = caller.Replace("(Counter-Terrorist) ", "");
+                if (caller.IndexOf(uniqueCode) > 0) caller = caller.Substring(0, caller.IndexOf(uniqueCode) + 1);
+                if (caller.IndexOf(me) > -1)
+                    return;
+                // this shit only returns first character of persons name
 
-            // make self check ignore, "status" in console breaks this
-            log(2, $"caller id [{caller}] says: {message}");
-            chatCommand(caller, message, teamSay);
+                // make self check ignore, "status" in console breaks this
+                log(2, $"caller id [{caller}] says: {message}");
+                chatCommand(caller, message, teamSay);
+            }
+            catch (System.Exception e)
+            {
+                log(1, $"{e}");
+                throw;
+            }
         }
     }
 
@@ -570,6 +580,17 @@ public static class Utils
     }
 
     /// <summary>
+    /// audioplayer wrapper, ONLY USE AS THREAD
+    /// </summary>
+    public static void playSound(int[] freq, int[] len)
+    {
+        freq = freq ?? new int[] { 880, 587, 698, 880, 587, 698, 880, 1047, 988, 784, 698, 784, 880, 587, 523, 658, 587 };
+        len = len ?? new int[] { 500, 1000, 500, 500, 1000, 500, 250, 250, 500, 500, 250, 250, 500, 500, 250, 250, 750 };
+
+        PoopAudio.Audio.play(new PoopAudio.Tone(freq, len));
+    }
+
+    /// <summary>
     /// dumb
     /// </summary>
     public static string getCommit()
@@ -578,9 +599,9 @@ public static class Utils
         {   // Open the text file using a stream reader.
             using (System.IO.StreamReader sr = new System.IO.StreamReader("./.git/ORIG_HEAD"))
             {
-            // Read the stream to a string, and write the string to the console.
+                // Read the stream to a string, and write the string to the console.
                 string line = sr.ReadToEnd();
-                return line.Substring(0,7);
+                return line.Substring(0, 7);
             }
         }
         catch (System.IO.IOException)
@@ -614,9 +635,11 @@ public static class Utils
                 connected = true;
                 break;
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 log(1, "Could not connect to remote console... retrying...");
+                if (_testing)
+                    log(1, $"{e}");
             }
         }
 
@@ -638,15 +661,11 @@ public static class Utils
             });
         }*/
 
-        // if we got here we should be all ready
-        // should run this in seperate thread? //TODO
-        /*
-        int[] storms_freq = new int[] { 880, 587, 698, 880, 587, 698, 880, 1047, 988, 784, 698, 784, 880, 587, 523, 658, 587 };
-        int[] storms_len = new int[] { 500, 1000, 500, 500, 1000, 500, 250, 250, 500, 500, 250, 250, 500, 500, 250, 250, 750 };
-        var storms = new PoopAudio.Tone(storms_freq, storms_len);
-        PoopAudio.Audio.play(storms);
-        // remove above if issues
-        */
+        new Thread(() =>
+        {
+            playSound(new int[0], new int[0]); // should default to song of storms
+        }).Start();
+
         if (_testing)
         {
             Console.Title = $"[dev] {Console.Title} ({me})";

@@ -11,7 +11,9 @@ This file contains most simple code;
 ganestate intergration triggers and such
 ----------
 
-    REDO ENTIRE THIS PASSING BY REFERENCE INSTEAD OF COPY FUCK SAKE
+future additions whenever motivated enough:
+    twitch chat intergration
+    big advertising mode
 */
 
 namespace loudmouth
@@ -153,7 +155,7 @@ namespace loudmouth
                                 Utils.owo(o);
                             }
                             if (Utils._singlesMode)
-                                Utils.owo("+" + Environment.NewLine + "enemydown");
+                                Utils.owo("beep boop i got a kill" + Environment.NewLine + "enemydown");
                             else if (!Utils._singlesMode && !Utils._puntualMode)
                                 onKill(ref gs);
                         }
@@ -170,7 +172,7 @@ namespace loudmouth
                         if (Utils._puntualMode) // todo
                             Utils.owo("oops i have died");
                         if (Utils._singlesMode)
-                            Utils.owo("-");
+                            Utils.owo("ouch ow i died");
                         else if (!Utils._singlesMode && !Utils._puntualMode)
                             onDeath(ref gs);
                     }
