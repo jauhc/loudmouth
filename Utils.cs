@@ -41,7 +41,7 @@ public static class Utils
     public static bool pastaCooked = false;
     public static int gamePort = 1338;
     public static int netPort = 2121;
-    public static String me = "0";
+    public static String me = "0"; // holy FUCK solve this already
     public static CSGSI.Nodes.PlayerNode myNode;
     // could check gs.Provider.SteamID
     public static string myname = "";
@@ -491,7 +491,7 @@ public static class Utils
                 caller = caller.Replace("(Terrorist) ", "");
                 caller = caller.Replace("(Counter-Terrorist) ", "");
                 if (caller.IndexOf(uniqueCode) > 0) caller = caller.Substring(0, caller.IndexOf(uniqueCode) + 1);
-                if (caller.IndexOf(me) > -1)
+                if (caller.IndexOf(myname) > -1)
                     return;
                 // this shit only returns first character of persons name
 

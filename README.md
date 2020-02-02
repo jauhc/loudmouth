@@ -31,7 +31,11 @@ Powered by [CSGSI by rakijah](https://github.com/rakijah/CSGSI)
 - proper text parsing from console (damage done)
 
 ### optional features i wont prioritise
-- finding install location on linux
+- finding configs on linux
+
+### if you *really* need this on linux heres what you need to do
+- `getMyCommunityID()` in `Utils.cs` should return your communityid (needed for )
+- read and sort out `readConfig()` in `Utils.cs`
 
 
 ### Disclaimer
