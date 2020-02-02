@@ -34,7 +34,7 @@ Powered by [CSGSI by rakijah](https://github.com/rakijah/CSGSI)
 - finding configs on linux
 
 ### if you *really* need this on linux heres what you need to do
-- `getMyCommunityID()` in `Utils.cs` should return your communityid (needed for )
+- `getMyCommunityID()` in `Utils.cs` should return your communityid (needed for chat parsing or something i forget ;))
 - read and sort out `readConfig()` in `Utils.cs`
 
 
