@@ -26,7 +26,7 @@ public class Settings
     public bool deaths = false;
     public bool greets = false;
     public bool clanid = false;
-    public bool clanfx = true;
+    public bool clanfx = false;
 }
 
 public static class Utils
@@ -351,7 +351,6 @@ public static class Utils
     /// </summary>
     private static void chatCommand(string sender, string message, bool teamChat = false)
     {
-        if (message == "") return; // because you can type a space in chat and crash this, not sure if correct place to check, didnt look at stackdump
         string sayCmd = "say ";
         if (teamChat) sayCmd = "say_team ";
         if (sender.Trim() == myname.Trim()) return; // could sleep but meh
@@ -360,12 +359,12 @@ public static class Utils
 
         if (message.IndexOf("!help") > -1)
         {
-            owo("say commands available: !random, owo");
+            owo($"{sayCmd} commands available: !random, owo");
         }
         else if (message.IndexOf("!gg") > -1
         || message.IndexOf("!rs") > -1)
         {
-            owo($"say unknown command, see commands available with !help");
+            owo($"{sayCmd} unknown command, see commands available with !help");
         }
         else if (message.IndexOf("!random") > -1)
         {
@@ -491,12 +490,14 @@ public static class Utils
                 if (teamSay)
                 {
                     int atAt = sender.LastIndexOf("@");
-                    sender = sender.Substring(0, atAt - 1);
+                    if (sender.LastIndexOf("@") > 1)
+                        sender = sender.Substring(0, atAt - 1);
                 }
                 if (sender.LastIndexOf(uniqueCode) > -1)
                     sender = sender.Substring(0, sender.Length - 3);
                 string teamPrefix = teamSay ? "(TEAM)" : "";
                 log(2, $"{teamPrefix} sender id [{sender}] says: {message}");
+                if (message.Length == 0) return;
                 chatCommand(sender, message, teamSay);
             }
             catch (System.Exception e)
