@@ -11,7 +11,8 @@ Powered by [CSGSI by rakijah](https://github.com/rakijah/CSGSI)
 
 ### Install & Usage
 - Running .NET Core binaries requires some sort of .NET runtime unless statically compiled
-- `-netconport 2121` to CS:GO launch options
+- `-netconport 2121` and `-netconpassword "superpassword"` to CS:GO launch options
+- edit password in `init()` in `Utils.cs` to said password
 - `dotnet run` to run
 - `dotnet run dev` to run silently (outputs to terminal, not csgo)
 
@@ -27,6 +28,7 @@ Powered by [CSGSI by rakijah](https://github.com/rakijah/CSGSI)
 ![results](https://github.com/jauhc/loudmouth/raw/master/rk_l.jpg)
 
 ### todo list
+- proper config (but already done in v2)
 - the whole multikill jazz
 - proper text parsing from console (damage done)
 

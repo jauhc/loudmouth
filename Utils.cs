@@ -21,18 +21,19 @@ public class Settings
     public bool state = true;
     public bool owo = true;
     public bool kills = false;
-    public bool killsRadio = true;
+    public bool killsRadio = false;
     public bool dmgReport = false;
     public bool deaths = false;
     public bool greets = false;
     public bool clanid = false;
     public bool clanfx = false;
+    public bool radiospam = false;
 }
 
 public static class Utils
 {
 
-    static System.Timers.Timer speechTimer, clanTimer;
+    static System.Timers.Timer speechTimer, clanTimer, radioTimer;
     public static readonly Random rng = new Random();
     public static readonly string cmdHash = terribleHash(14); // for command verification purposes
     public static bool _testing = false;
@@ -113,6 +114,11 @@ public static class Utils
 
     static void initTimer()
     {
+        // radio spamming
+        radioTimer = new System.Timers.Timer(300);
+        radioTimer.Elapsed += radioSpammer;
+        radioTimer.Enabled = settings.radiospam;
+
         // speechTimer is for speaking
         speechTimer = new System.Timers.Timer(800);
         speechTimer.Elapsed += speakBuffer;
@@ -296,6 +302,7 @@ public static class Utils
 
         // TODO make toggles instead?
         run($"alias loud \"echo 0 LIST {cmdHash}\"");
+        run($"alias ohn getout");
         sleep(50, 16);
 
         run($"setinfo loud_state_o \"\"");
@@ -306,6 +313,11 @@ public static class Utils
         run($"setinfo loud_owo_o \"\"");
         run($"alias loud_owo_off \"echo 0 OWO {cmdHash}\"");
         run($"alias loud_owo_on \"echo 1 OWO {cmdHash}\"");
+        sleep(50, 16);
+
+        run($"setinfo loud_radiospam_o \"\"");
+        run($"alias loud_radiospam_off \"echo 0 RADIOSPAM {cmdHash}\"");
+        run($"alias loud_radiospam_on \"echo 1 RADIOSPAM {cmdHash}\"");
         sleep(50, 16);
 
         run($"setinfo loud_dmgreport_o \"\"");
@@ -416,6 +428,7 @@ public static class Utils
                 echo($"GREETS = " + (settings.greets ? "ON" : "OFF"));
                 echo($"CLANS = " + (settings.clanid ? "ON" : "OFF"));
                 echo($"CLANFX = " + (settings.clanid ? "ON" : "OFF"));
+                echo($"RADIOSPAM = " + (settings.radiospam ? "ON" : "OFF"));
                 break;
 
             case "STATE":
@@ -430,6 +443,11 @@ public static class Utils
                 settings.clanid = set;
                 clanTimer.Enabled = set;
                 run("cl_clanid 0");
+                break;
+
+            case "RADIOSPAM":
+                settings.radiospam = set;
+                radioTimer.Enabled = set;
                 break;
 
             case "CLANFX":
@@ -529,6 +547,12 @@ public static class Utils
                     checkCvars(rawOutput.Substring(0, hashIdx).Split(' '));
             }
         }
+    }
+
+    public static void radioSpammer(Object source = null, ElapsedEventArgs e = null)
+    {
+        if (settings.radiospam && gameState.Player.State.Health > 0)
+            run("ohn");
     }
 
     /// <summary>
@@ -650,6 +674,7 @@ public static class Utils
             {
                 client = new PrimS.Telnet.Client("localhost", netPort, new System.Threading.CancellationToken()); // blocking
                 connected = true;
+                run($"PASS anim#"); // password?
                 break;
             }
             catch (Exception e)
