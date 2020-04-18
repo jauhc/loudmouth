@@ -25,8 +25,8 @@ public class Settings
     public bool dmgReport = false;
     public bool deaths = false;
     public bool greets = false;
-    public bool clanid = false;
-    public bool clanfx = false;
+    public bool clanid = true;
+    public bool clanfx = true;
     public bool radiospam = false;
 }
 
@@ -551,7 +551,7 @@ public static class Utils
 
     public static void radioSpammer(Object source = null, ElapsedEventArgs e = null)
     {
-        if (settings.radiospam && gameState.Player.State.Health > 0)
+        if (settings.radiospam && gameState.Player.State.Health != 0)
             run("ohn");
     }
 
