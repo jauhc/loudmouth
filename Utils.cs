@@ -33,6 +33,7 @@ public class Settings
 public static class Utils
 {
 
+    // TODO a sort of factory for creating timers
     static System.Timers.Timer speechTimer, clanTimer, radioTimer;
     public static readonly Random rng = new Random();
     public static readonly string cmdHash = terribleHash(14); // for command verification purposes
@@ -570,7 +571,7 @@ public static class Utils
             {
                 // TODO get player name from output and check if alive via GSI
                 // very simple if using sanitised names
-                // also no friendly fire check
+                // also no friendly fire check <-- could be easy if sanitised names
                 var dmg = 0;
                 var breaking_point1 = lined_output[i].IndexOf("Damage Taken");
                 var breaking_point2 = lined_output[i + 1].IndexOf("-------------------------");
@@ -703,10 +704,8 @@ public static class Utils
             });
         }*/
 
-        new Thread(() =>
-        {
-            playSound(new int[0], new int[0]); // should default to song of storms
-        }).Start();
+
+        syncPlayAudio(new int[0], new int[0]); // should default to song of storms
 
         if (_testing)
         {
@@ -715,6 +714,14 @@ public static class Utils
             log(1, "test string 2");
             log(2, "test string 3");
         }
+    }
+
+    public static void syncPlayAudio(int[] freq, int[] len)
+    {
+        new Thread(() =>
+        {
+            playSound(freq, len); // should default to song of storms
+        }).Start();
     }
 
     /// <summary>
@@ -771,6 +778,7 @@ public static class Utils
 
     /// <summary>
     /// terrible hash method in case if streamer uses so sniper cant mess with user
+    /// honestly i still havent figured out a better solution, config files are out of the question
     /// </summary>
     public static string terribleHash(int length)
     {
