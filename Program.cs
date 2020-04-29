@@ -122,13 +122,11 @@ this is possible BUT autoconfig will not work");
                     Utils.owo($"Game start event");
                 }
 
-                // beep boop when round is over and new one has begun // TODO thread it along with poopaudio
+                // beep boop when round is over and new one has begun
                 if (oldState.Round.Phase.ToString().ToLower() == "over"
                     && gs.Round.Phase.ToString().ToLower() == "freezetime")
                 {
-                    Console.Beep(800, 700);
-                    Console.Beep(400, 400);
-                    Console.Beep(100, 600);
+                    Utils.syncPlayAudio(new int[] { 800, 400, 100 }, new int[] { 700, 400, 600 });
                 }
 
 
@@ -172,7 +170,7 @@ this is possible BUT autoconfig will not work");
                     myDeaths = gs.Player.MatchStats.Deaths;
                 var curDeaths = gs.Player.MatchStats.Deaths;
                 if (Utils.settings.deaths)
-                // TODO logic needs improving here
+                    // TODO logic needs improving here
                     if (curDeaths > myDeaths && !(gs.Map.Round == 1 && gs.Player.MatchStats.Deaths == 0))
                     {
                         if (Utils._puntualMode) // todo
